@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <!-- OVERLAY E BARRA LATERAL -->
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin ativo">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <!-- TOPO -->
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Vendas do Freezer</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- Bloco 1: Registrar Venda -->
+        <section class="card full-width" style="border-top: 5px solid #c2410c;">
+            <h2 style="color: #c2410c;">❄️ Registrar Venda de Bebida / Item</h2>
+            <form id="form-venda">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                    <div class="mb-3">
+                        <label for="data-venda">🗓️ Data:</label>
+                        <input type="date" id="data-venda" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nome-produto">🥤 Produto:</label>
+                        <input type="text" id="nome-produto" required placeholder="Ex: Cerveja Heineken, Água, Refri...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="qtd-produto">📦 Quantidade Vendida:</label>
+                        <input type="number" id="qtd-produto" min="1" required placeholder="Ex: 2">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="valor-produto">💵 Valor Unitário (R$):</label>
+                        <input type="number" id="valor-produto" min="0" step="0.01" required placeholder="Ex: 8.00">
+                    </div>
+                </div>
+
+                <button type="submit" style="background-color: #c2410c; margin-top: 25px; padding: 15px; font-size: 1.1rem;">Lançar Venda ✔️</button>
+            </form>
+        </section>
+
+        <!-- Bloco 2: Resumo Geral (WIDGETS DASHBOARD) -->
+        <section class="card full-width" style="border-top: 5px solid #0284c7;">
+            <h2 style="color: #0369a1;">📊 Resumo Geral do Dia (Freezer)</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+                <!-- Widget Quantidade -->
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Total de Produtos</p>
+                    <p id="total-produtos" style="font-size: 2.2rem; font-weight: 700; color: #0f172a;">0</p>
+                </div>
+                
+                <!-- Widget Bruto Dia -->
+                <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #166534; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Faturamento Bruto Dia</p>
+                    <p id="total-valor" style="font-size: 1.8rem; font-weight: 700; color: #15803d;">R$ 0,00</p>
+                </div>
+                
+                <!-- Widget Bruto Mês -->
+                <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #1e3a8a; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Faturamento Bruto Mês</p>
+                    <p id="total-valor-mes" style="font-size: 1.8rem; font-weight: 700; color: #1d4ed8;">R$ 0,00</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bloco 3: Histórico de Fechamentos -->
+        <section class="card full-width">
+            <h2>📋 Histórico de Lançamentos</h2>
+
+            <!-- ÁREA DE BOTÃO E FILTROS -->
+            <div class="filtros-container">
+                <div class="filtros-inputs" style="flex: 1;">
+                    <input type="text" id="filtro-busca" placeholder="🔍 Buscar produto..." title="Buscar por texto" style="max-width: 180px;">
+                    
+                    <select id="filtro-produto" title="Filtrar por Produto" style="max-width: 180px;">
+                        <option value="">Todos os Produtos</option>
+                    </select>
+                    
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="date" id="filtro-data-inicio" title="Data Inicial">
+                        <span style="font-weight: 500; color: #94a3b8;">até</span>
+                        <input type="date" id="filtro-data-fim" title="Data Final">
+                    </div>
+                    
+                    <button id="btn-limpar-filtro" type="button" title="Limpar Filtros">Limpar Filtros</button>
+                </div>
+                
+                <div>
+                    <button id="btn-exportar" style="background-color: #1e293b; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem;" title="Baixar Planilha Excel">
+                        📥 Exportar Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resumo dinâmico da busca -->
+            <div id="resumo-busca" style="display: none; background-color: #f0f9ff; color: #0369a1; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; font-weight: 500; border: 1px solid #bae6fd; align-items: center; justify-content: space-between;"></div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Valor Unitário</th>
+                            <th>Valor Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-vendas">
+                        <!-- Linhas adicionadas dinamicamente pelo JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        const dbFreezerRef = ref(db, 'registrosFreezer');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const form = document.getElementById('form-venda');
+            const listaVendas = document.getElementById('lista-vendas');
+            const totalProdutosEl = document.getElementById('total-produtos');
+            const totalValorEl = document.getElementById('total-valor');
+            const totalValorMesEl = document.getElementById('total-valor-mes');
+            const btnExportar = document.getElementById('btn-exportar');
+            const filtroProdutoSelect = document.getElementById('filtro-produto');
+
+            const dataLocal = new Date();
+            const hoje = dataLocal.getFullYear() + '-' + String(dataLocal.getMonth() + 1).padStart(2, '0') + '-' + String(dataLocal.getDate()).padStart(2, '0');
+            const dataVendaEl = document.getElementById('data-venda');
+            if(dataVendaEl) dataVendaEl.value = hoje;
+
+            let registrosFreezerGlobais = {};
+
+            onValue(dbFreezerRef, (snapshot) => {
+                registrosFreezerGlobais = snapshot.val() || {};
+                atualizarTela();
+            });
+
+            function atualizarOpcoesFiltro() {
+                if(!filtroProdutoSelect) return;
+                const valorAtual = filtroProdutoSelect.value;
+                filtroProdutoSelect.innerHTML = '<option value="">Todos os Produtos</option>';
+                
+                const produtosUnicos = [...new Set(Object.values(registrosFreezerGlobais).map(r => r.produto))];
+                
+                produtosUnicos.forEach(produto => {
+                    const option = document.createElement('option');
+                    option.value = produto;
+                    option.textContent = produto;
+                    filtroProdutoSelect.appendChild(option);
+                });
+
+                filtroProdutoSelect.value = valorAtual;
+            }
+
+            const filtroBusca = document.getElementById('filtro-busca');
+            if(filtroBusca) filtroBusca.addEventListener('input', atualizarTela);
+            
+            if(filtroProdutoSelect) filtroProdutoSelect.addEventListener('change', atualizarTela);
+            const fDataInicio = document.getElementById('filtro-data-inicio');
+            if(fDataInicio) fDataInicio.addEventListener('change', atualizarTela);
+            const fDataFim = document.getElementById('filtro-data-fim');
+            if(fDataFim) fDataFim.addEventListener('change', atualizarTela);
+            
+            const btnLimparFiltro = document.getElementById('btn-limpar-filtro');
+            if(btnLimparFiltro) {
+                btnLimparFiltro.addEventListener('click', function() {
+                    if(document.getElementById('filtro-busca')) document.getElementById('filtro-busca').value = '';
+                    if(document.getElementById('filtro-produto')) document.getElementById('filtro-produto').value = '';
+                    if(document.getElementById('filtro-data-inicio')) document.getElementById('filtro-data-inicio').value = '';
+                    if(document.getElementById('filtro-data-fim')) document.getElementById('filtro-data-fim').value = '';
+                    atualizarTela();
+                });
+            }
+
+            function atualizarTela() {
+                if(!listaVendas) return;
+                listaVendas.innerHTML = '';
+                let totalProdutosGeral = 0;
+                let faturamentoBrutoGeral = 0;
+                let faturamentoBrutoMes = 0;
+                
+                let qtdResultadosFiltrados = 0;
+                let valorTotalFiltrado = 0;
+                
+                const dataSelecionadaForm = dataVendaEl ? dataVendaEl.value : '';
+                const dataSelecionadaBR = dataSelecionadaForm ? dataSelecionadaForm.split('-').reverse().join('/') : '';
+                const mesAnoAtual = String(new Date().getMonth() + 1).padStart(2, '0') + '/' + new Date().getFullYear();
+
+                const fBusca = filtroBusca ? filtroBusca.value.toLowerCase() : '';
+                const fProduto = filtroProdutoSelect ? filtroProdutoSelect.value : '';
+                const fDataInicioVal = fDataInicio ? fDataInicio.value : '';
+                const fDataFimVal = fDataFim ? fDataFim.value : '';
+                const usandoFiltros = fBusca !== "" || fProduto !== "" || fDataInicioVal !== "" || fDataFimVal !== "";
+
+                atualizarOpcoesFiltro();
+
+                Object.keys(registrosFreezerGlobais).forEach((idFirebase) => {
+                    const registro = registrosFreezerGlobais[idFirebase];
+
+                    if (registro.data === dataSelecionadaBR) {
+                        faturamentoBrutoGeral += registro.total;
+                        totalProdutosGeral += registro.quantidade;
+                    }
+                    if (registro.data && registro.data.slice(3) === mesAnoAtual) {
+                        faturamentoBrutoMes += registro.total;
+                    }
+
+                    let mostrar = true;
+                    if (usandoFiltros) {
+                        if (fBusca !== "" && !registro.produto.toLowerCase().includes(fBusca)) mostrar = false;
+                        if (fProduto !== "" && registro.produto !== fProduto) mostrar = false;
+                        if (fDataInicioVal !== "" || fDataFimVal !== "") {
+                            const p = registro.data.split('/');
+                            const dataISO = `${p[2]}-${p[1]}-${p[0]}`; 
+                            if (fDataInicioVal !== "" && dataISO < fDataInicioVal) mostrar = false;
+                            if (fDataFimVal !== "" && dataISO > fDataFimVal) mostrar = false;
+                        }
+                    } else {
+                        const mesAnoSelecionado = dataSelecionadaBR ? dataSelecionadaBR.slice(3) : '';
+                        if (registro.data && registro.data.slice(3) !== mesAnoSelecionado) {
+                            mostrar = false;
+                        }
+                    }
+
+                    if (mostrar) {
+                        qtdResultadosFiltrados++;
+                        valorTotalFiltrado += registro.total;
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${registro.data}</td>
+                            <td><strong>${registro.produto}</strong></td>
+                            <td>${registro.quantidade}</td>
+                            <td>${registro.valorUnitarioTexto}</td>
+                            <td style="color: #15803d; font-weight: bold;">${registro.totalTexto}</td>
+                            <td>
+                                <button class="btn-excluir" data-id="${idFirebase}">Excluir</button>
+                            </td>
+                        `;
+                        listaVendas.appendChild(tr);
+                    }
+                });
+
+                if(totalProdutosEl) totalProdutosEl.textContent = totalProdutosGeral;
+                if(totalValorEl) totalValorEl.textContent = faturamentoBrutoGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if(totalValorMesEl) totalValorMesEl.textContent = faturamentoBrutoMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                const resumoBuscaEl = document.getElementById('resumo-busca');
+                if (resumoBuscaEl) {
+                    if (usandoFiltros) {
+                        resumoBuscaEl.style.display = 'flex';
+                        let textoBuscado = filtroBusca ? filtroBusca.value : '';
+                        let trechoTexto = textoBuscado !== "" ? ` para "<strong>${textoBuscado}</strong>"` : "";
+                        let valorFormatado = valorTotalFiltrado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        resumoBuscaEl.innerHTML = `<span>Exibindo <strong>${qtdResultadosFiltrados}</strong> resultado(s)${trechoTexto}.</span> <span>Total filtrado: <strong style="color: #0c4a6e;">${valorFormatado}</strong></span>`;
+                    } else {
+                        resumoBuscaEl.style.display = 'none';
+                    }
+                }
+            }
+
+            if(form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const dataInput = dataVendaEl ? dataVendaEl.value : '';
+                    const produtoInput = document.getElementById('nome-produto').value.trim();
+                    const qtdProduto = parseInt(document.getElementById('qtd-produto').value);
+                    const valorProduto = parseFloat(document.getElementById('valor-produto').value);
+
+                    const totalVenda = qtdProduto * valorProduto;
+                    const dataFormatada = dataInput ? dataInput.split('-').reverse().join('/') : '';
+
+                    const novoRegistro = {
+                        data: dataFormatada,
+                        produto: produtoInput,
+                        quantidade: qtdProduto,
+                        valorUnitario: valorProduto,
+                        total: totalVenda,
+                        valorUnitarioTexto: valorProduto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                        totalTexto: totalVenda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                    };
+
+                    push(dbFreezerRef, novoRegistro);
+                    alert("Venda lançada com sucesso!");
+                    form.reset();
+                    if(dataVendaEl) dataVendaEl.value = dataInput;
+                });
+            }
+
+            if(listaVendas) {
+                listaVendas.addEventListener('click', function (event) {
+                    if (event.target.classList.contains('btn-excluir')) {
+                        const idFirebase = event.target.getAttribute('data-id');
+                        if (confirm("Deseja apagar esta venda do freezer do banco de dados?")) {
+                            remove(ref(db, 'registrosFreezer/' + idFirebase));
+                        }
+                    }
+                });
+            }
+
+            if (btnExportar) {
+                btnExportar.addEventListener('click', function () {
+                    const chaves = Object.keys(registrosFreezerGlobais);
+                    if (chaves.length === 0) {
+                        alert("Não há dados para exportar!");
+                        return;
+                    }
+
+                    let csvContent = "\uFEFFData;Produto;Quantidade;Valor Unitário;Total\n";
+
+                    chaves.forEach((id) => {
+                        const r = registrosFreezerGlobais[id];
+                        let vu = r.valorUnitario.toFixed(2).replace('.', ',');
+                        let t = r.total.toFixed(2).replace('.', ',');
+                        csvContent += `${r.data};${r.produto};${r.quantidade};R$ ${vu};R$ ${t}\n`;
+                    });
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", "fechamento_freezer.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+
+            if(dataVendaEl) dataVendaEl.addEventListener('change', atualizarTela);
+
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay'); 
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', function () {
+                    sidebar.classList.add('open');
+                    overlay.classList.add('active');
+                });
+                function fecharMenu() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+        });
+    </script>
+</body>
+
+</html>

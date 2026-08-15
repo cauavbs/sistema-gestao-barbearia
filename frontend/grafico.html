@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- BIBLIOTECA DE GRÁFICOS (CHART.JS) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin ativo">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu" type="button">☰</button>
+        <h1>Gráfico Comparativo</h1>
+        <button id="btn-sair"
+            style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair
+            🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- CONTROLES GERAIS -->
+        <section class="card full-width" style="border-top: 5px solid #1e293b;">
+            <h2 style="color: #1e293b;">⚙️ Configuração da Análise</h2>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; align-items: flex-end;">
+
+                <div class="campo-periodo">
+                    <label for="mes-final">🗓️ Último mês da comparação:</label>
+                    <input type="month" id="mes-final">
+                </div>
+
+                <div class="campo-periodo">
+                    <label for="periodo-comparacao">📊 Quantidade de meses:</label>
+                    <select id="periodo-comparacao">
+                        <option value="2">2 meses</option>
+                        <option value="3">3 meses</option>
+                        <option value="4">4 meses</option>
+                        <option value="5">5 meses</option>
+                        <option value="6" selected>6 meses</option>
+                        <option value="7">7 meses</option>
+                        <option value="8">8 meses</option>
+                        <option value="9">9 meses</option>
+                        <option value="10">10 meses</option>
+                        <option value="11">11 meses</option>
+                        <option value="12">12 meses (1 Ano)</option>
+                        <option value="13">13 meses</option>
+                        <option value="14">14 meses</option>
+                        <option value="15">15 meses</option>
+                        <option value="16">16 meses</option>
+                        <option value="17">17 meses</option>
+                        <option value="18">18 meses</option>
+                        <option value="19">19 meses</option>
+                        <option value="20">20 meses</option>
+                        <option value="21">21 meses</option>
+                        <option value="22">22 meses</option>
+                        <option value="23">23 meses</option>
+                        <option value="24">24 meses (2 Anos)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button id="btn-atualizar-grafico" type="button"
+                        style="background-color: #1e293b; margin-top: 0; padding: 12px;">Atualizar Gráficos 🔄</button>
+                </div>
+            </div>
+
+            <p class="mensagem-grafico" id="status-grafico"
+                style="margin-top: 15px; font-size: 0.9rem; color: #64748b;">
+                Selecione o período e clique em atualizar.
+            </p>
+        </section>
+
+        <!-- GRÁFICO 1: RESULTADO GERAL -->
+        <section class="card full-width" style="margin-top: 10px; border-top: 5px solid #15803d;">
+            <h2 style="color: #15803d;">📈 1. Saúde Financeira (Entradas x Saídas x Lucro)</h2>
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 20px;">
+                <div
+                    style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #166534; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Entradas
+                        no Período</p>
+                    <strong id="total-entradas-periodo" style="font-size: 1.6rem; font-weight: 700; color: #15803d;">R$
+                        0,00</strong>
+                </div>
+
+                <div
+                    style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #991b1b; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Saídas no
+                        Período</p>
+                    <strong id="total-saidas-periodo" style="font-size: 1.6rem; font-weight: 700; color: #dc2626;">R$
+                        0,00</strong>
+                </div>
+
+                <div
+                    style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #1e3a8a; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Resultado
+                        Acumulado</p>
+                    <strong id="total-lucro-periodo" style="font-size: 1.6rem; font-weight: 700; color: #1d4ed8;">R$
+                        0,00</strong>
+                </div>
+            </div>
+
+            <div class="grafico-wrapper" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="grafico-comparativo" aria-label="Gráfico comparativo dos resultados mensais"></canvas>
+            </div>
+        </section>
+
+        <!-- GRÁFICO 2: DESEMPENHO POR BARBEIRO -->
+        <section class="card full-width" style="margin-top: 10px; border-top: 5px solid #0284c7;">
+            <h2 style="color: #0369a1;">✂️ 2. Desempenho por Barbeiro (Faturamento Bruto)</h2>
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Evolução do valor total gerado por cada
+                profissional mês a mês.</p>
+            <div class="grafico-wrapper" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="grafico-barbeiros" aria-label="Gráfico de desempenho dos barbeiros"></canvas>
+            </div>
+        </section>
+
+        <!-- GRÁFICO 3: FORMAS DE PAGAMENTO -->
+        <section class="card full-width" style="margin-top: 10px; border-top: 5px solid #d97706;">
+            <h2 style="color: #b45309;">💳 3. Comparativo de Pagamentos (Qtd. de Fichas)</h2>
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Tendência de uso de Pix, Cartões e
+                Dinheiro pelos clientes.</p>
+            <div class="grafico-wrapper" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="grafico-pagamentos" aria-label="Gráfico de formas de pagamento"></canvas>
+            </div>
+        </section>
+
+        <!-- TABELA DE DETALHAMENTO -->
+        <section class="card full-width" style="margin-top: 10px;">
+            <h2>📋 Detalhamento por Mês</h2>
+            <div class="tabela-grafico-container" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mês</th>
+                            <th>Cortes</th>
+                            <th>Freezer</th>
+                            <th>Entradas</th>
+                            <th>Saídas</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-comparativa"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay');
+
+            function fecharMenu() {
+                if (sidebar) sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+            }
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', function () {
+                    sidebar.classList.add('open');
+                    overlay.classList.add('active');
+                });
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+
+            const mesFinalEl = document.getElementById('mes-final');
+            const periodoEl = document.getElementById('periodo-comparacao');
+            const btnAtualizar = document.getElementById('btn-atualizar-grafico');
+            const tabelaEl = document.getElementById('tabela-comparativa');
+            const statusEl = document.getElementById('status-grafico');
+
+            const hoje = new Date();
+            if (mesFinalEl) mesFinalEl.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+
+            let dadosFreezer = {};
+            let dadosInsumos = {};
+            let dadosCaixa = {};
+            let dadosCortes = {};
+
+            let graficoPrincipal = null;
+            let graficoBarbeiros = null;
+            let graficoPagamentos = null;
+
+            onValue(ref(db, 'registrosBarbearia'), (snapshot) => { dadosCortes = snapshot.val() || {}; atualizarComparacao(); });
+            onValue(ref(db, 'registrosFreezer'), (snapshot) => { dadosFreezer = snapshot.val() || {}; atualizarComparacao(); });
+            onValue(ref(db, 'registrosInsumos'), (snapshot) => { dadosInsumos = snapshot.val() || {}; atualizarComparacao(); });
+            onValue(ref(db, 'registrosCaixa'), (snapshot) => { dadosCaixa = snapshot.val() || {}; atualizarComparacao(); });
+
+            if (btnAtualizar) btnAtualizar.addEventListener('click', atualizarComparacao);
+            if (mesFinalEl) mesFinalEl.addEventListener('change', atualizarComparacao);
+            if (periodoEl) periodoEl.addEventListener('change', atualizarComparacao);
+
+            function criarListaMeses(mesFinal, quantidade) {
+                const [ano, mes] = mesFinal.split('-').map(Number);
+                const meses = [];
+                for (let i = quantidade - 1; i >= 0; i--) {
+                    const data = new Date(ano, mes - 1 - i, 1);
+                    const mesNumero = String(data.getMonth() + 1).padStart(2, '0');
+                    const anoNumero = data.getFullYear();
+                    const rotulo = data.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '');
+                    meses.push({ chave: `${mesNumero}/${anoNumero}`, rotulo });
+                }
+                return meses;
+            }
+
+            function somarPorMes(registrosArr, chaveMes, campoValor) {
+                return registrosArr.reduce((total, registro) => {
+                    if (registro.data && registro.data.slice(3) === chaveMes) {
+                        return total + (Number(registro[campoValor]) || 0);
+                    }
+                    return total;
+                }, 0);
+            }
+
+            function moeda(valor) {
+                return (Number(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+
+            function atualizarComparacao() {
+                try {
+                    const mesFinal = mesFinalEl ? mesFinalEl.value : '';
+                    const quantidade = periodoEl ? Number(periodoEl.value) : 6;
+
+                    if (!mesFinal || quantidade < 2 || quantidade > 24) return;
+                    const meses = criarListaMeses(mesFinal, quantidade);
+
+                    const cortesArr = Object.values(dadosCortes);
+                    const freezerArr = Object.values(dadosFreezer);
+                    const insumosArr = Object.values(dadosInsumos);
+                    const caixasArr = Object.values(dadosCaixa);
+
+                    const barbeirosUnicos = [...new Set(cortesArr.map(r => r.barbeiro).filter(b => b))];
+
+                    const resultados = meses.map((mes) => {
+                        const cortes = somarPorMes(cortesArr, mes.chave, 'faturamento'); // <-- Linha alterada
+                        const totalFreezer = somarPorMes(freezerArr, mes.chave, 'total');
+                        const saidas = somarPorMes(insumosArr, mes.chave, 'total');
+                        const entradas = cortes + totalFreezer;
+                        const lucro = entradas - saidas;
+
+                        const faturamentoBarbeiros = {};
+                        barbeirosUnicos.forEach(nome => {
+                            faturamentoBarbeiros[nome] = cortesArr.reduce((total, reg) => {
+                                if (reg.data && reg.data.slice(3) === mes.chave && reg.barbeiro === nome) {
+                                    return total + (Number(reg.faturamento) || 0);
+                                }
+                                return total;
+                            }, 0);
+                        });
+
+                        const pix = somarPorMes(caixasArr, mes.chave, 'pix');
+                        const debito = somarPorMes(caixasArr, mes.chave, 'debito');
+                        const credito = somarPorMes(caixasArr, mes.chave, 'credito');
+                        const dinheiro = somarPorMes(caixasArr, mes.chave, 'fichasDinheiro');
+
+                        return { ...mes, cortes, freezer: totalFreezer, entradas, saidas, lucro, faturamentoBarbeiros, pix, debito, credito, dinheiro };
+                    });
+
+                    renderizarResumo(resultados);
+                    renderizarTabela(resultados);
+
+                    if (typeof Chart !== 'undefined') {
+                        renderizarGraficoPrincipal(resultados);
+                        renderizarGraficoBarbeiros(resultados, barbeirosUnicos);
+                        renderizarGraficoPagamentos(resultados);
+                        if (statusEl) statusEl.textContent = `Comparação atualizada: ${quantidade} meses, encerrando em ${meses[meses.length - 1].chave}. (Sincronizado via Firebase)`;
+                    } else {
+                        if (statusEl) statusEl.textContent = "Erro: A biblioteca de gráficos não carregou. Verifique sua conexão com a internet.";
+                    }
+                } catch (erro) {
+                    console.error("Erro interno ao gerar gráficos:", erro);
+                }
+            }
+
+            function renderizarResumo(resultados) {
+                const totais = resultados.reduce((acumulado, item) => {
+                    acumulado.entradas += item.entradas;
+                    acumulado.saidas += item.saidas;
+                    acumulado.lucro += item.lucro;
+                    return acumulado;
+                }, { entradas: 0, saidas: 0, lucro: 0 });
+
+                const elEntradas = document.getElementById('total-entradas-periodo');
+                const elSaidas = document.getElementById('total-saidas-periodo');
+                const lucroEl = document.getElementById('total-lucro-periodo');
+
+                if (elEntradas) elEntradas.textContent = moeda(totais.entradas);
+                if (elSaidas) elSaidas.textContent = moeda(totais.saidas);
+
+                if (lucroEl) {
+                    lucroEl.textContent = moeda(totais.lucro);
+                    lucroEl.style.color = totais.lucro >= 0 ? '#1d4ed8' : '#dc2626';
+                }
+            }
+
+            function renderizarTabela(resultados) {
+                if (!tabelaEl) return;
+                tabelaEl.innerHTML = resultados.map((item) => `
+                    <tr>
+                        <td><strong>${item.chave}</strong></td>
+                        <td>${moeda(item.cortes)}</td>
+                        <td>${moeda(item.freezer)}</td>
+                        <td>${moeda(item.entradas)}</td>
+                        <td>${moeda(item.saidas)}</td>
+                        <td style="color: ${item.lucro >= 0 ? '#15803d' : '#dc2626'}; font-weight: bold;">${moeda(item.lucro)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            function renderizarGraficoPrincipal(resultados) {
+                const canvas = document.getElementById('grafico-comparativo');
+                if (!canvas) return;
+                const contexto = canvas.getContext('2d');
+                if (graficoPrincipal) graficoPrincipal.destroy();
+
+                graficoPrincipal = new Chart(contexto, {
+                    type: 'line',
+                    data: {
+                        labels: resultados.map(item => item.rotulo),
+                        datasets: [
+                            { label: 'Entradas', data: resultados.map(item => item.entradas), borderColor: '#15803d', backgroundColor: 'rgba(21, 128, 61, 0.12)', borderWidth: 3, tension: 0.25, pointRadius: 5, fill: true },
+                            { label: 'Saídas', data: resultados.map(item => item.saidas), borderColor: '#dc2626', backgroundColor: 'rgba(220, 38, 38, 0.12)', borderWidth: 3, tension: 0.25, pointRadius: 5, fill: true },
+                            { label: 'Resultado', data: resultados.map(item => item.lucro), borderColor: '#1d4ed8', backgroundColor: 'rgba(29, 78, 216, 0.12)', borderWidth: 3, tension: 0.25, pointRadius: 5, fill: true }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${moeda(c.parsed.y)}` } } }, scales: { y: { ticks: { callback: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) } } } }
+                });
+            }
+
+            function renderizarGraficoBarbeiros(resultados, barbeirosUnicos) {
+                const canvas = document.getElementById('grafico-barbeiros');
+                if (!canvas) return;
+                const contexto = canvas.getContext('2d');
+                if (graficoBarbeiros) graficoBarbeiros.destroy();
+
+                const cores = ['#0284c7', '#ea580c', '#7c3aed', '#db2777', '#059669', '#ca8a04', '#475569', '#dc2626'];
+                const datasetsBarbeiros = barbeirosUnicos.map((nome, index) => ({
+                    label: nome,
+                    data: resultados.map(r => r.faturamentoBarbeiros[nome]),
+                    borderColor: cores[index % cores.length],
+                    backgroundColor: cores[index % cores.length] + '20',
+                    borderWidth: 2.5,
+                    tension: 0.25, pointRadius: 4, pointHoverRadius: 6
+                }));
+
+                graficoBarbeiros = new Chart(contexto, {
+                    type: 'line',
+                    data: { labels: resultados.map(item => item.rotulo), datasets: datasetsBarbeiros },
+                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${moeda(c.parsed.y)}` } } }, scales: { y: { ticks: { callback: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) } } } }
+                });
+            }
+
+            function renderizarGraficoPagamentos(resultados) {
+                const canvas = document.getElementById('grafico-pagamentos');
+                if (!canvas) return;
+                const contexto = canvas.getContext('2d');
+                if (graficoPagamentos) graficoPagamentos.destroy();
+
+                graficoPagamentos = new Chart(contexto, {
+                    type: 'line',
+                    data: {
+                        labels: resultados.map(item => item.rotulo),
+                        datasets: [
+                            { label: 'Pix', data: resultados.map(item => item.pix), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.12)', borderWidth: 2.5, tension: 0.25, pointRadius: 4 },
+                            { label: 'Cartão Crédito', data: resultados.map(item => item.credito), borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.12)', borderWidth: 2.5, tension: 0.25, pointRadius: 4 },
+                            { label: 'Cartão Débito', data: resultados.map(item => item.debito), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)', borderWidth: 2.5, tension: 0.25, pointRadius: 4 },
+                            { label: 'Dinheiro Físico', data: resultados.map(item => item.dinheiro), borderColor: '#64748b', backgroundColor: 'rgba(100, 116, 139, 0.12)', borderWidth: 2.5, tension: 0.25, pointRadius: 4 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.parsed.y} fichas` } } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 5 } } } }
+                });
+            }
+        });
+    </script>
+
+    <!-- SCRIPT DO APLICATIVO (SERVICE WORKER) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('App Registrado com sucesso!'))
+                    .catch(err => console.log('Falha ao registrar o App: ', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

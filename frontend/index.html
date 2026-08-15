@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin ativo">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Painel de Fichas</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        
+        <!-- BLOCO 1: REGISTRAR FECHAMENTO (GRID MODERNO) -->
+        <section class="card full-width" id="bloco-lancamento" style="border-top: 5px solid #c2410c;">
+            <h2>✂️ Lançar Fechamento do Barbeiro</h2>
+            <form id="form-atendimento">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                    
+                    <div class="mb-3">
+                        <label for="data-fechamento">🗓️ Data:</label>
+                        <input type="date" id="data-fechamento" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="barbeiro">💈 Barbeiro:</label>
+                        <div class="select-container">
+                            <select id="barbeiro" required></select>
+                            <button type="button" id="btn-adicionar-barbeiro" title="Adicionar barbeiro">➕</button>
+                            <button type="button" id="btn-editar-barbeiro" title="Editar barbeiro">✏️</button>
+                            <button type="button" id="btn-remover-barbeiro" title="Remover barbeiro">🗑️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="qtd-fichas">🏷️ Quantidade de Fichas (Cortes):</label>
+                        <input type="number" id="qtd-fichas" min="1" required placeholder="Ex: 10">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="valor-gorjeta">💰 Gorjetas (R$):</label>
+                        <input type="number" id="valor-gorjeta" min="0" step="0.01" placeholder="Ex: 15.00">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="valor-vale">💸 Vale / Adiantamento (R$):</label>
+                        <input type="number" id="valor-vale" min="0" step="0.01" placeholder="Ex: 50.00">
+                    </div>
+
+                </div>
+                
+                <button type="submit" style="margin-top: 25px; padding: 15px; font-size: 1.1rem;">Registrar Fechamento ✔️</button>
+            </form>
+        </section>
+
+        <!-- BLOCO 2: RESUMO GERAL (WIDGETS DASHBOARD) -->
+        <section class="card full-width" style="border-top: 5px solid #0284c7;">
+            <h2 id="titulo-resumo" style="color: #0369a1;">📊 Resumo do Dia</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <!-- Widget Fichas do Dia -->
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Total de Fichas (Dia)</p>
+                    <p id="total-atendimentos" style="font-size: 2.2rem; font-weight: 700; color: #0f172a;">0</p>
+                </div>
+
+                <!-- Widget Fichas do Mês -->
+                <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #166534; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Total de Fichas (Mês)</p>
+                    <p id="total-fichas-mes" style="font-size: 2.2rem; font-weight: 700; color: #15803d;">0</p>
+                </div>
+                
+                <!-- Widget Bruto Dia (Exclusivo Master) -->
+                <div id="widget-bruto-dia" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #166534; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Bruto Dia</p>
+                    <p id="total-valor" style="font-size: 1.8rem; font-weight: 700; color: #15803d;">R$ 0,00</p>
+                </div>
+                
+                <!-- Widget Bruto Mês (Exclusivo Master) -->
+                <div id="widget-bruto-mes" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #1e3a8a; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Bruto Mês Atual</p>
+                    <p id="total-valor-mes" style="font-size: 1.8rem; font-weight: 700; color: #1d4ed8;">R$ 0,00</p>
+                </div>
+            </div>
+
+            <div id="resumo-barbeiro-info" style="display: none; margin-top: 15px; padding: 20px; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);">
+                <p style="font-size: 1rem; font-weight: 500; opacity: 0.9;">Sua Parte (Mês Atual)</p>
+                <p id="total-parte-barbeiro-mes" style="font-size: 2.2rem; font-weight: 700; margin-top: 5px;">R$ 0,00</p>
+            </div>
+        </section>
+
+        <!-- BLOCO 3: HISTÓRICO DE LANÇAMENTOS -->
+        <section class="card full-width">
+            <h2>📋 Histórico de Lançamentos</h2>
+            
+            <div class="filtros-container">
+                <div class="filtros-inputs" style="flex: 1;">
+                    <input type="text" id="filtro-busca" placeholder="🔍 Buscar barbeiro..." title="Buscar por texto" style="max-width: 200px;">
+                    <select id="filtro-barbeiro" title="Filtrar por Barbeiro" style="max-width: 200px;">
+                        <option value="">Todos os Barbeiros</option>
+                    </select>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="date" id="filtro-data-inicio" title="Data Inicial">
+                        <span style="font-weight: 500; color: #94a3b8;">até</span>
+                        <input type="date" id="filtro-data-fim" title="Data Final">
+                    </div>
+                    <button id="btn-limpar-filtro" type="button" title="Limpar Filtros">Limpar Filtros</button>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;" id="container-botoes-admin">
+                    <button id="btn-exportar" style="background-color: #1e293b; color: white;" title="Baixar Planilha Excel">📥 Exportar Excel</button>
+                    <button id="btn-pagar-visiveis" style="background-color: #10b981; color: white;" title="Marcar todos como pagos">✔️ Pagar Todos</button>
+                </div>
+            </div>
+
+            <div id="resumo-busca" style="display: none; background-color: #f0f9ff; color: #0369a1; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; font-weight: 500; border: 1px solid #bae6fd; align-items: center; justify-content: space-between;"></div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Barbeiro</th>
+                            <th>Fichas</th>
+                            <th>Gorjeta</th>
+                            <th>Vale</th>
+                            <th>Parte Barbeiro</th>
+                            <th id="coluna-faturamento-bruto">Faturamento Bruto</th>
+                            <th id="coluna-acoes">Status / Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-atendimentos"></tbody>
+                </table>
+            </div>
+        </section>
+        
+        <input type="file" id="input-comprovante" accept="image/*,application/pdf" style="display: none;">
+    </main>
+
+    <script src="js/api.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        window.firebaseAuth = auth; // usado pelo js/api.js para pegar o token em cada chamada
+
+        let registrosGlobais = {};
+        let listaBarbeiros = [];
+        let perfilUsuario = null;
+        let nomeUsuario = null;
+        let idRegistroParaPagar = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('form-atendimento');
+            const inputComprovante = document.getElementById('input-comprovante');
+            const dataLocal = new Date();
+            const hoje = dataLocal.getFullYear() + '-' + String(dataLocal.getMonth() + 1).padStart(2, '0') + '-' + String(dataLocal.getDate()).padStart(2, '0');
+            if (document.getElementById('data-fechamento')) document.getElementById('data-fechamento').value = hoje;
+
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            // Recarrega a lista de fichas a partir da API (substitui o onValue em tempo real)
+            async function carregarFichas() {
+                try {
+                    const lista = await api.fichas.listar();
+                    registrosGlobais = {};
+                    (lista || []).forEach(reg => { registrosGlobais[reg.id] = reg; });
+                    atualizarTela();
+                } catch (err) {
+                    console.error('Erro ao carregar fichas:', err);
+                }
+            }
+
+            // Recarrega a lista de barbeiros a partir da API
+            async function carregarBarbeiros() {
+                try {
+                    listaBarbeiros = await api.barbeiros.listar() || [];
+                    renderizarOpcoesBarbeiros();
+                } catch (err) {
+                    console.error('Erro ao carregar barbeiros:', err);
+                }
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = '/login.html';
+                } else {
+                    try {
+                        const dados = await api.usuarios.meuPerfil();
+                        if (dados && dados.perfil) {
+                            perfilUsuario = dados.perfil;
+                            nomeUsuario = dados.nome;
+
+                            aplicarRestricoesDePerfil();
+                            await carregarBarbeiros();
+                            await carregarFichas();
+                        } else {
+                            alert("Usuário não cadastrado no banco de dados.");
+                            window.location.href = '/login.html';
+                        }
+                    } catch (err) {
+                        console.error('Erro ao carregar perfil:', err);
+                    }
+                }
+            });
+
+            function aplicarRestricoesDePerfil() {
+                if (perfilUsuario === 'barbeiro') {
+                    document.querySelectorAll('.link-admin').forEach(el => el.style.display = 'none');
+                    const blocoLanc = document.getElementById('bloco-lancamento');
+                    if (blocoLanc) blocoLanc.style.display = 'none';
+                    const btnAdmin = document.getElementById('container-botoes-admin');
+                    if (btnAdmin) btnAdmin.style.display = 'none';
+                    const filtroBusca = document.getElementById('filtro-busca');
+                    if (filtroBusca) filtroBusca.style.display = 'none';
+
+                    const widgetBrutoDia = document.getElementById('widget-bruto-dia');
+                    if (widgetBrutoDia) widgetBrutoDia.style.display = 'none';
+
+                    const widgetBrutoMes = document.getElementById('widget-bruto-mes');
+                    if (widgetBrutoMes) widgetBrutoMes.style.display = 'none';
+
+                    const colFaturamentoBruto = document.getElementById('coluna-faturamento-bruto');
+                    if (colFaturamentoBruto) colFaturamentoBruto.style.display = 'none';
+
+                    const tituloResumo = document.getElementById('titulo-resumo');
+                    if (tituloResumo) tituloResumo.textContent = 'Seu Desempenho (Visão do Barbeiro)';
+                    const resumoBarbeiroInfo = document.getElementById('resumo-barbeiro-info');
+                    if (resumoBarbeiroInfo) resumoBarbeiroInfo.style.display = 'block';
+                }
+            }
+
+            function renderizarOpcoesBarbeiros() {
+                const barbeiroSelect = document.getElementById('barbeiro');
+                const filtroBarbeiro = document.getElementById('filtro-barbeiro');
+
+                if (barbeiroSelect) barbeiroSelect.innerHTML = '<option value="" disabled selected>Selecione o barbeiro</option>';
+                if (filtroBarbeiro) filtroBarbeiro.innerHTML = '<option value="">Todos os Barbeiros</option>';
+
+                if (perfilUsuario === 'barbeiro') {
+                    if (filtroBarbeiro) {
+                        filtroBarbeiro.innerHTML = `<option value="${nomeUsuario}" selected>${nomeUsuario}</option>`;
+                        filtroBarbeiro.style.pointerEvents = "none";
+                    }
+                } else {
+                    listaBarbeiros.forEach(function (nome) {
+                        if (barbeiroSelect) barbeiroSelect.innerHTML += `<option value="${nome}">${nome}</option>`;
+                        if (filtroBarbeiro) filtroBarbeiro.innerHTML += `<option value="${nome}">${nome}</option>`;
+                    });
+                }
+            }
+
+            function atualizarTela() {
+                const listaAtendimentos = document.getElementById('lista-atendimentos');
+                if (!listaAtendimentos) return;
+                listaAtendimentos.innerHTML = '';
+
+                let totalFichasGeral = 0, totalFichasMes = 0, faturamentoBrutoGeral = 0, faturamentoBrutoMes = 0;
+                let suaParteMes = 0;
+                let qtdResultadosFiltrados = 0, faturamentoFiltrado = 0, parteBarbeiroFiltrado = 0;
+
+                const dataFechamentoEl = document.getElementById('data-fechamento');
+                const dataSelecionadaForm = dataFechamentoEl ? dataFechamentoEl.value : '';
+                const dataSelecionadaBR = dataSelecionadaForm.split('-').reverse().join('/');
+                const mesAnoAtual = String(new Date().getMonth() + 1).padStart(2, '0') + '/' + new Date().getFullYear();
+
+                const fBuscaEl = document.getElementById('filtro-busca');
+                const fBusca = fBuscaEl ? fBuscaEl.value.toLowerCase() : '';
+                const fBarbeiroEl = document.getElementById('filtro-barbeiro');
+                const fBarbeiro = fBarbeiroEl ? fBarbeiroEl.value : '';
+                const fDataInicioEl = document.getElementById('filtro-data-inicio');
+                const fDataInicio = fDataInicioEl ? fDataInicioEl.value : '';
+                const fDataFimEl = document.getElementById('filtro-data-fim');
+                const fDataFim = fDataFimEl ? fDataFimEl.value : '';
+                const usandoFiltros = fBusca !== "" || fBarbeiro !== "" || fDataInicio !== "" || fDataFim !== "";
+
+                Object.keys(registrosGlobais).forEach(function (idFirebase) {
+                    const registro = registrosGlobais[idFirebase];
+
+                    if (perfilUsuario === 'barbeiro' && registro.barbeiro !== nomeUsuario) return;
+
+                    if (registro.data === dataSelecionadaBR) {
+                        faturamentoBrutoGeral += registro.faturamento;
+                        totalFichasGeral += registro.fichas;
+                    }
+                    if (registro.data && registro.data.slice(3) === mesAnoAtual) {
+                        faturamentoBrutoMes += registro.faturamento;
+                        totalFichasMes += registro.fichas;
+                        if (registro.barbeiro === nomeUsuario) suaParteMes += registro.totalBarbeiro;
+                    }
+
+                    let mostrar = true;
+                    if (usandoFiltros) {
+                        if (fBusca !== "" && !registro.barbeiro.toLowerCase().includes(fBusca)) mostrar = false;
+                        if (fBarbeiro !== "" && registro.barbeiro !== fBarbeiro) mostrar = false;
+                        if (fDataInicio !== "" || fDataFim !== "") {
+                            const p = registro.data.split('/');
+                            const dataISO = `${p[2]}-${p[1]}-${p[0]}`;
+                            if (fDataInicio !== "" && dataISO < fDataInicio) mostrar = false;
+                            if (fDataFim !== "" && dataISO > fDataFim) mostrar = false;
+                        }
+                    } else {
+                        if (registro.data && registro.data.slice(3) !== dataSelecionadaBR.slice(3)) mostrar = false;
+                    }
+
+                    if (mostrar) {
+                        qtdResultadosFiltrados++;
+                        faturamentoFiltrado += registro.faturamento;
+                        parteBarbeiroFiltrado += registro.totalBarbeiro;
+
+                        const tr = document.createElement('tr');
+                        if (registro.pago) tr.classList.add('linha-paga');
+
+                        let botaoDocumento = (registro.pago && registro.comprovante) ? `<button class="btn-ver-doc" data-id="${idFirebase}" style="background-color: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold;" title="Ver Comprovante Anexado">📄</button>` : '';
+
+                        let botoesAcao = '';
+                        if (perfilUsuario === 'master') {
+                            const textoBotao = registro.pago ? 'Desfazer' : 'Pagar';
+                            const corBotao = registro.pago ? '#94a3b8' : '#10b981';
+                            botoesAcao = `
+                                <button class="btn-pago" data-index="${idFirebase}" style="background-color: ${corBotao}; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 5px;">${textoBotao}</button>
+                                <button class="btn-excluir" data-index="${idFirebase}" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">X</button>
+                            `;
+                        } else {
+                            const statusTexto = registro.pago ? '✔️ Pago' : '⏳ Pendente';
+                            const statusCor = registro.pago ? '#15803d' : '#b45309';
+                            botoesAcao = `<span style="color: ${statusCor}; font-weight: bold; margin-left: 5px;">${statusTexto}</span>`;
+                        }
+
+                        const gorjetaVal = (registro.gorjeta || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        const valeVal = (registro.vale || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                        let colunaFaturamentoMaster = '';
+                        if (perfilUsuario === 'master') {
+                            const fatTexto = (registro.faturamento || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                            colunaFaturamentoMaster = `<td style="color: #0284c7; font-weight: bold;">${fatTexto}</td>`;
+                        }
+
+                        tr.innerHTML = `
+                            <td>${registro.data}</td>
+                            <td><strong>${registro.barbeiro.split(' ')[0]}</strong></td>
+                            <td>${registro.fichas}</td>
+                            <td style="color: #16a34a;">${gorjetaVal}</td>
+                            <td style="color: #ef4444;">${valeVal}</td>
+                            <td style="color: ${registro.totalBarbeiro < 0 ? '#ef4444' : 'green'}; font-weight: bold;">${registro.totalBarbeiroTexto}</td>
+                            ${colunaFaturamentoMaster}
+                            <td style="display: flex; gap: 5px; align-items: center;">
+                                ${botaoDocumento}
+                                ${botoesAcao}
+                            </td>
+                        `;
+                        listaAtendimentos.appendChild(tr);
+                    }
+                });
+
+                if (document.getElementById('total-atendimentos')) document.getElementById('total-atendimentos').textContent = totalFichasGeral;
+                if (document.getElementById('total-fichas-mes')) document.getElementById('total-fichas-mes').textContent = totalFichasMes;
+                if (document.getElementById('total-valor')) document.getElementById('total-valor').textContent = faturamentoBrutoGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if (document.getElementById('total-valor-mes')) document.getElementById('total-valor-mes').textContent = faturamentoBrutoMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if (document.getElementById('total-parte-barbeiro-mes')) document.getElementById('total-parte-barbeiro-mes').textContent = suaParteMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                const resumoBuscaEl = document.getElementById('resumo-busca');
+                if (resumoBuscaEl) {
+                    if (usandoFiltros) {
+                        resumoBuscaEl.style.display = 'flex';
+                        let fatFormatado = faturamentoFiltrado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        let barbFormatado = parteBarbeiroFiltrado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                        let textoResumo = `<span style="font-size: 1.1rem; font-weight: bold; color: #15803d;">Parte do Barbeiro: ${barbFormatado}</span>`;
+
+                        if (perfilUsuario === 'master') {
+                            textoResumo = `Faturamento Bruto: <strong style="color: #0c4a6e;">${fatFormatado}</strong><br>` + textoResumo;
+                        }
+
+                        resumoBuscaEl.innerHTML = `<span>Exibindo <strong>${qtdResultadosFiltrados}</strong> lançamento(s).</span> <span style="text-align: right;">${textoResumo}</span>`;
+                    } else {
+                        resumoBuscaEl.style.display = 'none';
+                    }
+                }
+            }
+
+            if (form) {
+                form.addEventListener('submit', async function (event) {
+                    event.preventDefault();
+                    const dataInput = document.getElementById('data-fechamento').value;
+                    const barbeiroSelect = document.getElementById('barbeiro');
+                    const barbeiroNome = barbeiroSelect.options[barbeiroSelect.selectedIndex].text;
+                    const qtdFichas = parseInt(document.getElementById('qtd-fichas').value);
+                    const gorjeta = parseFloat(document.getElementById('valor-gorjeta').value) || 0;
+                    const vale = parseFloat(document.getElementById('valor-vale').value) || 0;
+
+                    const valorPorFicha = 20.00;
+                    const dataObjeto = new Date(dataInput + 'T00:00:00');
+                    const diaDaSemana = dataObjeto.getDay();
+
+                    let comissaoBarbeiro = 10.00, comissaoBarbearia = 10.00;
+                    if (diaDaSemana === 0) { comissaoBarbeiro = 17.00; comissaoBarbearia = 3.00; }
+
+                    const totalBarbeiro = (qtdFichas * comissaoBarbeiro) + gorjeta - vale;
+                    const totalBarbearia = qtdFichas * comissaoBarbearia;
+
+                    const novoRegistro = {
+                        data: dataInput.split('-').reverse().join('/'),
+                        barbeiro: barbeiroNome,
+                        fichas: qtdFichas,
+                        gorjeta: gorjeta,
+                        vale: vale,
+                        totalBarbeiro: totalBarbeiro,
+                        totalBarbearia: totalBarbearia,
+                        faturamento: qtdFichas * valorPorFicha,
+                        totalBarbeiroTexto: totalBarbeiro.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                        totalBarbeariaTexto: totalBarbearia.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                        pago: false,
+                        comprovante: null
+                    };
+
+                    try {
+                        await api.fichas.criar(novoRegistro);
+                        alert("Fechamento lançado com sucesso!");
+                        form.reset();
+                        document.getElementById('data-fechamento').value = dataInput;
+                        await carregarFichas();
+                    } catch (err) {
+                        alert('Erro ao lançar fechamento: ' + err.message);
+                    }
+                });
+            }
+
+            const listaAtend = document.getElementById('lista-atendimentos');
+            if (listaAtend) {
+                listaAtend.addEventListener('click', async function (event) {
+                    const idFirebase = event.target.getAttribute('data-index') || event.target.getAttribute('data-id');
+
+                    if (event.target.classList.contains('btn-excluir') && perfilUsuario === 'master') {
+                        if (confirm("Deseja apagar este lançamento?")) {
+                            await api.fichas.excluir(idFirebase);
+                            await carregarFichas();
+                        }
+                    }
+
+                    if (event.target.classList.contains('btn-pago') && perfilUsuario === 'master') {
+                        const registroAtual = registrosGlobais[idFirebase];
+
+                        if (registroAtual.pago) {
+                            if (confirm("Deseja desfazer este pagamento?\n\n(Aviso: O gasto que foi lançado nos Insumos NÃO será apagado automaticamente. Você precisará ir na tela de Insumos e excluí-lo lá).")) {
+                                await api.fichas.atualizar(idFirebase, { pago: false, comprovante: null });
+                                await carregarFichas();
+                            }
+                        } else {
+                            if (confirm("Deseja anexar um COMPROVANTE para este pagamento?")) {
+                                idRegistroParaPagar = idFirebase;
+                                inputComprovante.click();
+                            } else {
+                                if (confirm("Deseja marcar como pago SEM COMPROVANTE?")) {
+                                    await api.fichas.atualizar(idFirebase, { pago: true, comprovante: null });
+                                    await api.insumos.criar({
+                                        data: registroAtual.data,
+                                        conta: `Pagamento do barbeiro ${registroAtual.barbeiro}`,
+                                        quantidade: 1,
+                                        valor_unitario: registroAtual.totalBarbeiro,
+                                        total: registroAtual.totalBarbeiro,
+                                        valor_unitario_texto: registroAtual.totalBarbeiroTexto,
+                                        total_texto: registroAtual.totalBarbeiroTexto,
+                                        comprovante: null
+                                    });
+                                    alert("Pagamento registrado SEM comprovante e enviado aos Insumos com sucesso!");
+                                    await carregarFichas();
+                                }
+                            }
+                        }
+                    }
+
+                    if (event.target.classList.contains('btn-ver-doc')) {
+                        const registro = registrosGlobais[idFirebase];
+                        if (registro && registro.comprovante) {
+                            const win = window.open();
+                            if (registro.comprovante.includes('data:application/pdf')) {
+                                win.document.write(`<iframe src="${registro.comprovante}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%; position:fixed;" allowfullscreen></iframe>`);
+                            } else {
+                                win.document.write(`<img src="${registro.comprovante}" style="max-width:100%; height:auto; display:block; margin:20px auto;" />`);
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (inputComprovante) {
+                inputComprovante.addEventListener('change', function () {
+                    if (this.files && this.files[0] && idRegistroParaPagar) {
+                        const file = this.files[0];
+
+                        if (file.size > 2 * 1024 * 1024) {
+                            alert("O arquivo é muito grande. Escolha um comprovante de até 2MB.");
+                            inputComprovante.value = '';
+                            idRegistroParaPagar = null;
+                            return;
+                        }
+
+                        const reader = new FileReader();
+
+                        reader.onload = async function (e) {
+                            const base64Comprovante = e.target.result;
+                            const reg = registrosGlobais[idRegistroParaPagar];
+
+                            try {
+                                await api.fichas.atualizar(idRegistroParaPagar, {
+                                    pago: true,
+                                    comprovante: base64Comprovante
+                                });
+
+                                await api.insumos.criar({
+                                    data: reg.data,
+                                    conta: `Pagamento do barbeiro ${reg.barbeiro}`,
+                                    quantidade: 1,
+                                    valor_unitario: reg.totalBarbeiro,
+                                    total: reg.totalBarbeiro,
+                                    valor_unitario_texto: reg.totalBarbeiroTexto,
+                                    total_texto: reg.totalBarbeiroTexto,
+                                    comprovante: base64Comprovante
+                                });
+
+                                await carregarFichas();
+                            } catch (err) {
+                                alert('Erro ao registrar pagamento: ' + err.message);
+                            } finally {
+                                idRegistroParaPagar = null;
+                                inputComprovante.value = '';
+                            }
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            if (btnToggle) btnToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); });
+            if (overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); });
+            const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+            if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); });
+
+            const fBusca = document.getElementById('filtro-busca');
+            if (fBusca) fBusca.addEventListener('input', atualizarTela);
+            const fBarbeiro = document.getElementById('filtro-barbeiro');
+            if (fBarbeiro) fBarbeiro.addEventListener('change', atualizarTela);
+            const fDataIni = document.getElementById('filtro-data-inicio');
+            if (fDataIni) fDataIni.addEventListener('change', atualizarTela);
+            const fDataFim = document.getElementById('filtro-data-fim');
+            if (fDataFim) fDataFim.addEventListener('change', atualizarTela);
+            const dataF = document.getElementById('data-fechamento');
+            if (dataF) dataF.addEventListener('change', atualizarTela);
+            const btnLimpar = document.getElementById('btn-limpar-filtro');
+            if (btnLimpar) btnLimpar.addEventListener('click', () => {
+                if (document.getElementById('filtro-busca')) document.getElementById('filtro-busca').value = '';
+                if (perfilUsuario === 'master' && document.getElementById('filtro-barbeiro')) document.getElementById('filtro-barbeiro').value = '';
+                if (document.getElementById('filtro-data-inicio')) document.getElementById('filtro-data-inicio').value = '';
+                if (document.getElementById('filtro-data-fim')) document.getElementById('filtro-data-fim').value = '';
+                atualizarTela();
+            });
+
+            const btnAdicionarBarbeiro = document.getElementById('btn-adicionar-barbeiro');
+            const btnEditarBarbeiro = document.getElementById('btn-editar-barbeiro');
+            const btnRemoverBarbeiro = document.getElementById('btn-remover-barbeiro');
+            const barbeiroSelect = document.getElementById('barbeiro');
+
+            if (btnAdicionarBarbeiro) {
+                btnAdicionarBarbeiro.addEventListener('click', async () => {
+                    if (perfilUsuario !== 'master') {
+                        alert("Apenas administradores podem adicionar barbeiros.");
+                        return;
+                    }
+                    const novoNome = prompt("Digite o nome do novo barbeiro (Ex: Lucas Queiroz):");
+                    if (novoNome && novoNome.trim() !== "") {
+                        const nomeFormatado = novoNome.trim();
+                        if (!listaBarbeiros.includes(nomeFormatado)) {
+                            const novaLista = [...listaBarbeiros, nomeFormatado];
+                            await api.barbeiros.salvarLista(novaLista);
+                            await carregarBarbeiros();
+                            barbeiroSelect.value = nomeFormatado;
+                            alert(`Barbeiro "${nomeFormatado}" adicionado com sucesso!`);
+                        } else {
+                            alert("Este barbeiro já está na lista.");
+                        }
+                    }
+                });
+            }
+
+            if (btnEditarBarbeiro) {
+                btnEditarBarbeiro.addEventListener('click', async () => {
+                    if (perfilUsuario !== 'master') {
+                        alert("Apenas administradores podem editar barbeiros.");
+                        return;
+                    }
+                    if (!barbeiroSelect.value) {
+                        alert("Selecione um barbeiro na caixa ao lado para editar.");
+                        return;
+                    }
+                    const nomeAtual = barbeiroSelect.value;
+                    const novoNome = prompt("Edite o nome do barbeiro:", nomeAtual);
+
+                    if (novoNome && novoNome.trim() !== "" && novoNome.trim() !== nomeAtual) {
+                        const nomeFormatado = novoNome.trim();
+                        if (listaBarbeiros.includes(nomeFormatado)) {
+                            alert("Já existe um barbeiro com este nome.");
+                            return;
+                        }
+                        const novaLista = [...listaBarbeiros];
+                        const index = novaLista.indexOf(nomeAtual);
+                        if (index > -1) {
+                            novaLista[index] = nomeFormatado;
+                            await api.barbeiros.salvarLista(novaLista);
+                            await carregarBarbeiros();
+                            barbeiroSelect.value = nomeFormatado;
+                            alert(`Nome alterado de "${nomeAtual}" para "${nomeFormatado}".`);
+                        }
+                    }
+                });
+            }
+
+            if (btnRemoverBarbeiro) {
+                btnRemoverBarbeiro.addEventListener('click', async () => {
+                    if (perfilUsuario !== 'master') {
+                        alert("Apenas administradores podem remover barbeiros.");
+                        return;
+                    }
+                    if (!barbeiroSelect.value) {
+                        alert("Selecione um barbeiro na caixa ao lado para remover.");
+                        return;
+                    }
+                    const nomeAtual = barbeiroSelect.value;
+                    if (confirm(`Tem certeza que deseja remover "${nomeAtual}" da lista de opções?`)) {
+                        const novaLista = listaBarbeiros.filter(n => n !== nomeAtual);
+                        await api.barbeiros.salvarLista(novaLista);
+                        await carregarBarbeiros();
+                        alert(`Barbeiro "${nomeAtual}" foi removido da lista.`);
+                    }
+                });
+            }
+
+            // ==========================================
+            // BOTÕES DE EXPORTAR EXCEL E MARCAR COMO PAGO
+            // ==========================================
+            const btnExportar = document.getElementById('btn-exportar');
+            const btnPagarVisiveis = document.getElementById('btn-pagar-visiveis');
+
+            if (btnExportar) {
+                btnExportar.addEventListener('click', function () {
+                    const chaves = Object.keys(registrosGlobais);
+                    if (chaves.length === 0) {
+                        alert("Não há dados para exportar!");
+                        return;
+                    }
+
+                    let csvContent = "\uFEFFData;Barbeiro;Fichas;Gorjeta;Vale;Parte Barbeiro;Parte Barbearia;Faturamento Bruto\n";
+
+                    chaves.forEach((id) => {
+                        const r = registrosGlobais[id];
+                        let gorjeta = Number(r.gorjeta || 0).toFixed(2).replace('.', ',');
+                        let vale = Number(r.vale || 0).toFixed(2).replace('.', ',');
+                        let fat = Number(r.faturamento || 0).toFixed(2).replace('.', ',');
+
+                        csvContent += `${r.data};${r.barbeiro};${r.fichas};R$ ${gorjeta};R$ ${vale};${r.totalBarbeiroTexto};${r.totalBarbeariaTexto};R$ ${fat}\n`;
+                    });
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    link.setAttribute("href", URL.createObjectURL(blob));
+                    link.setAttribute("download", "relatorio_fichas.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+
+            if (btnPagarVisiveis) {
+                btnPagarVisiveis.addEventListener('click', function () {
+                    const botoesPagos = document.querySelectorAll('#lista-atendimentos .btn-pago');
+                    let idsPendentes = [];
+
+                    botoesPagos.forEach(btn => {
+                        const idFirebase = btn.getAttribute('data-index');
+                        const registro = registrosGlobais[idFirebase];
+                        if (registro && !registro.pago) {
+                            idsPendentes.push(idFirebase);
+                        }
+                    });
+
+                    if (idsPendentes.length === 0) {
+                        alert("Não há nenhum lançamento pendente visível na tela para pagar.");
+                        return;
+                    }
+
+                    async function marcarTodosComoPagos(base64Comprovante) {
+                        for (const idFirebase of idsPendentes) {
+                            const reg = registrosGlobais[idFirebase];
+
+                            await api.fichas.atualizar(idFirebase, {
+                                pago: true,
+                                comprovante: base64Comprovante
+                            });
+
+                            await api.insumos.criar({
+                                data: reg.data,
+                                conta: `Pagamento do barbeiro ${reg.barbeiro}`,
+                                quantidade: 1,
+                                valor_unitario: reg.totalBarbeiro,
+                                total: reg.totalBarbeiro,
+                                valor_unitario_texto: reg.totalBarbeiroTexto,
+                                total_texto: reg.totalBarbeiroTexto,
+                                comprovante: base64Comprovante
+                            });
+                        }
+                        await carregarFichas();
+                    }
+
+                    if (confirm(`Encontrados ${idsPendentes.length} lançamento(s) pendente(s).\nDeseja anexar um ÚNICO comprovante para todos eles?`)) {
+
+                        const inputTemporario = document.createElement('input');
+                        inputTemporario.type = 'file';
+                        inputTemporario.accept = 'image/*,application/pdf';
+                        inputTemporario.style.display = 'none';
+                        document.body.appendChild(inputTemporario);
+
+                        inputTemporario.onchange = function (e) {
+                            if (e.target.files && e.target.files[0]) {
+                                const file = e.target.files[0];
+
+                                if (file.size > 2 * 1024 * 1024) {
+                                    alert("O arquivo é muito grande. Escolha um comprovante de até 2MB.");
+                                    document.body.removeChild(inputTemporario);
+                                    return;
+                                }
+
+                                const reader = new FileReader();
+                                reader.onload = async function (event) {
+                                    const base64Comprovante = event.target.result;
+                                    await marcarTodosComoPagos(base64Comprovante);
+                                    alert(`${idsPendentes.length} lançamento(s) marcado(s) como pago(s) COM comprovante (e enviados aos Insumos)!`);
+                                    document.body.removeChild(inputTemporario);
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        };
+
+                        inputTemporario.click();
+
+                    } else {
+                        if (confirm("Deseja marcar todos como pagos SEM COMPROVANTE?")) {
+                            marcarTodosComoPagos(null).then(() => {
+                                alert(`${idsPendentes.length} lançamento(s) marcado(s) como pago(s) SEM comprovante (e enviados aos Insumos)!`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

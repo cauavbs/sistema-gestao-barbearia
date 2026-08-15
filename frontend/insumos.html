@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insumos e Contas - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <!-- OVERLAY E BARRA LATERAL -->
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin ativo">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <!-- TOPO -->
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Insumos e Contas</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- Bloco 1: Registrar Gasto -->
+        <section class="card full-width" style="border-top: 5px solid #ef4444;">
+            <h2 style="color: #dc2626;">💸 Registrar Conta ou Insumo</h2>
+            <form id="form-insumo">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                    <div class="mb-3">
+                        <label for="data-gasto">🗓️ Data:</label>
+                        <input type="date" id="data-gasto" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nome-conta">📝 Conta / Produto:</label>
+                        <input type="text" id="nome-conta" required placeholder="Ex: Conta de Luz, Gel, Lâminas...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="qtd-conta">📦 Quantidade:</label>
+                        <input type="number" id="qtd-conta" min="1" value="1" required placeholder="Ex: 1">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="valor-conta">💵 Valor Unitário / Total (R$):</label>
+                        <input type="number" id="valor-conta" min="0" step="0.01" required placeholder="Ex: 150.00">
+                    </div>
+                </div>
+                
+                <!-- Input oculto para o comprovante -->
+                <input type="file" id="input-comprovante-insumo" accept="image/*,application/pdf" style="display: none;">
+
+                <button type="submit" style="background-color: #ef4444; margin-top: 25px; padding: 15px; font-size: 1.1rem;">Lançar Gasto 📉</button>
+            </form>
+        </section>
+
+        <!-- Bloco 2: Resumo Geral (WIDGETS DASHBOARD) -->
+        <section class="card full-width" style="border-top: 5px solid #0284c7;">
+            <h2 style="color: #0369a1;">📊 Resumo Geral de Gastos</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+                <!-- Widget Quantidade de Gastos -->
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Gastos no Dia</p>
+                    <p id="total-qtd-gastos" style="font-size: 2.2rem; font-weight: 700; color: #0f172a;">0</p>
+                </div>
+                
+                <!-- Widget Gasto Bruto Dia -->
+                <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #991b1b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Gasto Bruto Dia</p>
+                    <p id="total-gasto-dia" style="font-size: 1.8rem; font-weight: 700; color: #dc2626;">R$ 0,00</p>
+                </div>
+                
+                <!-- Widget Gasto Bruto Mês -->
+                <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #991b1b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Gasto Bruto Mês</p>
+                    <p id="total-gasto-mes" style="font-size: 1.8rem; font-weight: 700; color: #dc2626;">R$ 0,00</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bloco 3: Histórico de Fechamentos -->
+        <section class="card full-width">
+            <h2>📋 Histórico de Lançamentos</h2>
+
+            <div class="filtros-container">
+                <div class="filtros-inputs" style="flex: 1;">
+                    <input type="text" id="filtro-busca" placeholder="🔍 Buscar nome..." title="Buscar por texto" style="max-width: 180px;">
+                    
+                    <select id="filtro-conta" title="Filtrar por Conta/Produto" style="max-width: 200px;">
+                        <option value="">Todas as Contas e Produtos</option>
+                    </select>
+                    
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="date" id="filtro-data-inicio" title="Data Inicial">
+                        <span style="font-weight: 500; color: #94a3b8;">até</span>
+                        <input type="date" id="filtro-data-fim" title="Data Final">
+                    </div>
+                    
+                    <button id="btn-limpar-filtro" type="button" title="Limpar Filtros">Limpar Filtros</button>
+                </div>
+                
+                <div>
+                    <button id="btn-exportar" style="background-color: #1e293b; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem;" title="Baixar Planilha Excel">
+                        📥 Exportar Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resumo dinâmico da busca -->
+            <div id="resumo-busca" style="display: none; background-color: #f0f9ff; color: #0369a1; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; font-weight: 500; border: 1px solid #bae6fd; align-items: center; justify-content: space-between;"></div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Conta / Produto</th>
+                            <th>Quantidade</th>
+                            <th>Valor Unitário</th>
+                            <th>Gasto Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-gastos">
+                        <!-- Linhas adicionadas dinamicamente pelo JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const dbInsumosRef = ref(db, 'registrosInsumos');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const form = document.getElementById('form-insumo');
+            const listaGastos = document.getElementById('lista-gastos');
+            const totalQtdGastosEl = document.getElementById('total-qtd-gastos');
+            const totalGastoDiaEl = document.getElementById('total-gasto-dia');
+            const totalGastoMesEl = document.getElementById('total-gasto-mes');
+            const btnExportar = document.getElementById('btn-exportar');
+            const filtroContaSelect = document.getElementById('filtro-conta');
+
+            const dataLocal = new Date();
+            const hoje = dataLocal.getFullYear() + '-' + String(dataLocal.getMonth() + 1).padStart(2, '0') + '-' + String(dataLocal.getDate()).padStart(2, '0');
+            const dataGastoEl = document.getElementById('data-gasto');
+            if(dataGastoEl) dataGastoEl.value = hoje;
+
+            let registrosInsumosGlobais = {};
+
+            onValue(dbInsumosRef, (snapshot) => {
+                registrosInsumosGlobais = snapshot.val() || {};
+                atualizarTela();
+            });
+
+            function atualizarOpcoesFiltro() {
+                if(!filtroContaSelect) return;
+                const valorAtual = filtroContaSelect.value;
+                filtroContaSelect.innerHTML = '<option value="">Todas as Contas e Produtos</option>';
+                const contasUnicas = [...new Set(Object.values(registrosInsumosGlobais).map(r => r.conta))];
+                contasUnicas.forEach(conta => {
+                    const option = document.createElement('option');
+                    option.value = conta;
+                    option.textContent = conta;
+                    filtroContaSelect.appendChild(option);
+                });
+                filtroContaSelect.value = valorAtual;
+            }
+
+            const filtroBusca = document.getElementById('filtro-busca');
+            if(filtroBusca) filtroBusca.addEventListener('input', atualizarTela);
+            
+            if(filtroContaSelect) filtroContaSelect.addEventListener('change', atualizarTela);
+            const fDataInicio = document.getElementById('filtro-data-inicio');
+            if(fDataInicio) fDataInicio.addEventListener('change', atualizarTela);
+            const fDataFim = document.getElementById('filtro-data-fim');
+            if(fDataFim) fDataFim.addEventListener('change', atualizarTela);
+            
+            const btnLimparFiltro = document.getElementById('btn-limpar-filtro');
+            if(btnLimparFiltro) {
+                btnLimparFiltro.addEventListener('click', function() {
+                    if(document.getElementById('filtro-busca')) document.getElementById('filtro-busca').value = '';
+                    if(document.getElementById('filtro-conta')) document.getElementById('filtro-conta').value = '';
+                    if(document.getElementById('filtro-data-inicio')) document.getElementById('filtro-data-inicio').value = '';
+                    if(document.getElementById('filtro-data-fim')) document.getElementById('filtro-data-fim').value = '';
+                    atualizarTela();
+                });
+            }
+
+            function atualizarTela() {
+                if(!listaGastos) return;
+                listaGastos.innerHTML = '';
+                let totalQuantidadeDia = 0;
+                let gastoBrutoDia = 0;
+                let gastoBrutoMes = 0;
+                
+                let qtdResultadosFiltrados = 0;
+                let valorTotalFiltrado = 0;
+                
+                const dataSelecionadaForm = dataGastoEl ? dataGastoEl.value : '';
+                const dataSelecionadaBR = dataSelecionadaForm ? dataSelecionadaForm.split('-').reverse().join('/') : '';
+                const mesAnoAtual = String(new Date().getMonth() + 1).padStart(2, '0') + '/' + new Date().getFullYear();
+
+                const fBusca = filtroBusca ? filtroBusca.value.toLowerCase() : '';
+                const fConta = filtroContaSelect ? filtroContaSelect.value : '';
+                const fDataInicioVal = fDataInicio ? fDataInicio.value : '';
+                const fDataFimVal = fDataFim ? fDataFim.value : '';
+                const usandoFiltros = fBusca !== "" || fConta !== "" || fDataInicioVal !== "" || fDataFimVal !== "";
+
+                atualizarOpcoesFiltro();
+
+                Object.keys(registrosInsumosGlobais).forEach((idFirebase) => {
+                    const registro = registrosInsumosGlobais[idFirebase];
+
+                    if (registro.data === dataSelecionadaBR) {
+                        gastoBrutoDia += Number(registro.total);
+                        totalQuantidadeDia += Number(registro.quantidade);
+                    }
+                    if (registro.data && registro.data.slice(3) === mesAnoAtual) {
+                        gastoBrutoMes += Number(registro.total);
+                    }
+
+                    let mostrar = true;
+                    if (usandoFiltros) {
+                        if (fBusca !== "" && !registro.conta.toLowerCase().includes(fBusca)) mostrar = false;
+                        if (fConta !== "" && registro.conta !== fConta) mostrar = false;
+                        if (fDataInicioVal !== "" || fDataFimVal !== "") {
+                            const p = registro.data.split('/');
+                            const dataISO = `${p[2]}-${p[1]}-${p[0]}`; 
+                            if (fDataInicioVal !== "" && dataISO < fDataInicioVal) mostrar = false;
+                            if (fDataFimVal !== "" && dataISO > fDataFimVal) mostrar = false;
+                        }
+                    } else {
+                        const mesAnoSelecionado = dataSelecionadaBR ? dataSelecionadaBR.slice(3) : '';
+                        if (registro.data && registro.data.slice(3) !== mesAnoSelecionado) {
+                            mostrar = false;
+                        }
+                    }
+
+                    if (mostrar) {
+                        qtdResultadosFiltrados++;
+                        valorTotalFiltrado += Number(registro.total);
+                   
+                        const tr = document.createElement('tr');
+                        
+                        let botaoDocumento = '';
+                        if (registro.comprovante) {
+                            botaoDocumento = `<button class="btn-ver-doc" data-doc="${registro.comprovante}" style="background-color: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin: 0; height: 32px; display: flex; align-items: center; justify-content: center;" title="Ver Comprovante Anexado">📄</button>`;
+                        }
+
+                        tr.innerHTML = `
+                            <td>${registro.data}</td>
+                            <td><strong>${registro.conta}</strong></td>
+                            <td>${registro.quantidade}</td>
+                            <td>${registro.valor_unitario_texto || registro.valorUnitarioTexto}</td>
+                            <td style="color: #dc2626; font-weight: bold;">${registro.total_texto || registro.totalTexto}</td>
+                            <td style="display: flex; gap: 8px; align-items: center;">
+                                ${botaoDocumento}
+                                <button class="btn-excluir" data-id="${idFirebase}">Excluir</button>
+                            </td>
+                        `;
+                        listaGastos.appendChild(tr);
+                    }
+                });
+
+                if(totalQtdGastosEl) totalQtdGastosEl.textContent = totalQuantidadeDia;
+                if(totalGastoDiaEl) totalGastoDiaEl.textContent = gastoBrutoDia.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if(totalGastoMesEl) totalGastoMesEl.textContent = gastoBrutoMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                const resumoBuscaEl = document.getElementById('resumo-busca');
+                if (resumoBuscaEl) {
+                    if (usandoFiltros) {
+                        resumoBuscaEl.style.display = 'flex';
+                        let textoBuscado = filtroBusca ? filtroBusca.value : '';
+                        let trechoTexto = textoBuscado !== "" ? ` para "<strong>${textoBuscado}</strong>"` : "";
+                        let valorFormatado = valorTotalFiltrado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        resumoBuscaEl.innerHTML = `<span>Exibindo <strong>${qtdResultadosFiltrados}</strong> resultado(s)${trechoTexto}.</span> <span>Total filtrado: <strong style="color: #991b1b;">${valorFormatado}</strong></span>`;
+                    } else {
+                        resumoBuscaEl.style.display = 'none';
+                    }
+                }
+            }
+
+            let registroPendenteInsumo = null;
+            const fileInputInsumo = document.getElementById('input-comprovante-insumo');
+
+            function salvarNoBanco(registro) {
+                push(dbInsumosRef, registro);
+                form.reset();
+                if(dataGastoEl) dataGastoEl.value = registro.data.split('/').reverse().join('-');
+                alert("Gasto lançado com sucesso!");
+            }
+
+            if(fileInputInsumo) {
+                fileInputInsumo.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) {
+                        if (registroPendenteInsumo) {
+                            salvarNoBanco(registroPendenteInsumo);
+                            registroPendenteInsumo = null;
+                        }
+                        return;
+                    }
+
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert("Para não sobrecarregar o banco de dados, escolha um comprovante de até 2MB.");
+                        fileInputInsumo.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        if (registroPendenteInsumo) {
+                            registroPendenteInsumo.comprovante = event.target.result;
+                            salvarNoBanco(registroPendenteInsumo);
+                            registroPendenteInsumo = null;
+                        }
+                        fileInputInsumo.value = ''; 
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            if(form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const dataInput = dataGastoEl ? dataGastoEl.value : '';
+                    const contaInput = document.getElementById('nome-conta').value.trim();
+                    const qtdConta = parseInt(document.getElementById('qtd-conta').value);
+                    const valorConta = parseFloat(document.getElementById('valor-conta').value);
+
+                    const totalGasto = qtdConta * valorConta;
+                    const dataFormatada = dataInput ? dataInput.split('-').reverse().join('/') : '';
+
+                    const novoRegistro = {
+                        data: dataFormatada,
+                        conta: contaInput,
+                        quantidade: qtdConta,
+                        valor_unitario: valorConta,
+                        total: totalGasto,
+                        valor_unitario_texto: valorConta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                        total_texto: totalGasto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                    };
+
+                    if (confirm("Deseja anexar um comprovante para este gasto?")) {
+                        registroPendenteInsumo = novoRegistro;
+                        if(fileInputInsumo) fileInputInsumo.click();
+                    } else {
+                        salvarNoBanco(novoRegistro);
+                    }
+                });
+            }
+
+            if(listaGastos) {
+                listaGastos.addEventListener('click', function (event) {
+                    if (event.target.classList.contains('btn-excluir')) {
+                        const idFirebase = event.target.getAttribute('data-id');
+                        if (confirm("Deseja apagar este gasto do banco de dados?")) {
+                            remove(ref(db, 'registrosInsumos/' + idFirebase));
+                        }
+                    }
+                    
+                    if (event.target.classList.contains('btn-ver-doc')) {
+                        const docBase64 = event.target.getAttribute('data-doc');
+                        fetch(docBase64).then(res => res.blob()).then(blob => {
+                            const url = URL.createObjectURL(blob);
+                            window.open(url, '_blank');
+                        });
+                    }
+                });
+            }
+
+            if (btnExportar) {
+                btnExportar.addEventListener('click', function () {
+                    const chaves = Object.keys(registrosInsumosGlobais);
+                    if (chaves.length === 0) {
+                        alert("Não há dados para exportar!");
+                        return;
+                    }
+                    let csvContent = "\uFEFFData;Conta/Produto;Quantidade;Valor Unitário;Total Gasto\n";
+                    chaves.forEach((id) => {
+                        const r = registrosInsumosGlobais[id];
+                        let vu = Number(r.valor_unitario || r.valorUnitario).toFixed(2).replace('.', ',');
+                        let t = Number(r.total).toFixed(2).replace('.', ',');
+                        csvContent += `${r.data};${r.conta};${r.quantidade};R$ ${vu};R$ ${t}\n`;
+                    });
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", "historico_gastos_insumos.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+
+            if(dataGastoEl) dataGastoEl.addEventListener('change', atualizarTela);
+
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay'); 
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', function () {
+                    sidebar.classList.add('open');
+                    overlay.classList.add('active');
+                });
+                function fecharMenu() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+        });
+    </script>
+</body>
+
+</html>

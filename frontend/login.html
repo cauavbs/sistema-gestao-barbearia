@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Barbearia</title>
+    <style>
+        :root {
+            --primary-dark-blue: #1e3a8a;
+            --primary-hover-blue: #172554;
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 45px 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .login-logo {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: var(--text-main);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-dark-blue);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-dark-blue), #0f172a);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, var(--primary-hover-blue), #020617);
+            box-shadow: 0 6px 15px rgba(30, 58, 138, 0.35);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .erro {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            font-size: 0.85rem;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: left;
+        }
+    </style>
+
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-logo">✂️</div>
+        <h1>Acesso ao Sistema</h1>
+        <form id="form-login">
+            <div id="mensagem-erro" class="erro">Usuário ou senha incorretos.</div>
+            
+            <div class="input-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="seu@email.com" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit">Entrar no Sistema</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+            const erroEl = document.getElementById('mensagem-erro');
+            erroEl.style.display = 'none';
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+                window.location.href = '/index.html'; 
+            } catch (error) {
+                if (error.code === 'auth/invalid-credential' && email === 'cauadev@barbearia.com') {
+                    try {
+                        const novaConta = await createUserWithEmailAndPassword(auth, email, senha);
+                        await set(ref(db, 'usuarios/' + novaConta.user.uid), {
+                            email: email,
+                            perfil: 'master',
+                            nome: 'Cauã Dev'
+                        });
+                        alert("Conta Mestre 'cauadev' criada com sucesso! Redirecionando...");
+                        window.location.href = '/index.html';
+                    } catch (criacaoErro) {
+                        erroEl.textContent = 'Erro ao criar conta mestre: ' + criacaoErro.message;
+                        erroEl.style.display = 'block';
+                    }
+                } else {
+                    erroEl.textContent = 'E-mail ou senha incorretos. Verifique seus dados.';
+                    erroEl.style.display = 'block';
+                }
+            }
+       });
+    </script>
+
+    <!-- SCRIPT DO APLICATIVO (SERVICE WORKER) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('App Registrado com sucesso!'))
+                    .catch(err => console.log('Falha ao registrar o App: ', err));
+            });
+        }
+    </script>
+</body>
+</html>

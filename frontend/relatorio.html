@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <!-- OVERLAY E BARRA LATERAL -->
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin ativo">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <!-- TOPO -->
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Relatórios e Ocorrências</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- Bloco 1: Botão e Formulário -->
+        <section class="card full-width" style="border-top: 5px solid #0284c7;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <h2 style="color: #0369a1;">📖 Diário de Ocorrências</h2>
+                <button id="btn-abrir-form" style="width: auto; margin-top: 0; background-color: #0284c7; padding: 12px 20px; border-radius: 8px;">
+                    + Adicionar Relatório
+                </button>
+            </div>
+
+            <!-- Formulário Oculto inicialmente -->
+            <div id="container-formulario" style="display: none; margin-top: 20px; background-color: #f8fafc; padding: 25px; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+                <form id="form-relatorio">
+                    <div class="mb-3" style="max-width: 250px;">
+                        <label for="data-relatorio">🗓️ Data da Ocorrência:</label>
+                        <input type="date" id="data-relatorio" required>
+                    </div>
+
+                    <div class="mb-3" style="margin-top: 15px;">
+                        <label for="texto-relatorio">✍️ Relato / Observação:</label>
+                        <textarea id="texto-relatorio" rows="5" required placeholder="Escreva aqui o que aconteceu no dia..." style="width: 100%; padding: 12px 16px; margin-top: 6px; border: 1.5px solid #e2e8f0; border-radius: 10px; background-color: #fff; font-size: 0.95rem; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+                        <button type="submit" style="background-color: #16a34a; flex: 1; margin-top: 0; padding: 12px;">Salvar Relatório ✔️</button>
+                        <button type="button" id="btn-cancelar" style="background-color: #64748b; flex: 1; margin-top: 0; padding: 12px;">Cancelar ✕</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Bloco 2: Lista de Relatórios -->
+        <section class="card full-width">
+            <h2>📋 Histórico de Relatórios</h2>
+            
+            <div class="filtros-container" style="margin-top: 15px; margin-bottom: 25px;">
+                <div class="filtros-inputs" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <input type="month" id="filtro-mes-relatorio" title="Filtrar por Mês" style="padding: 10px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; background-color: #f8fafc;">
+                    <button id="btn-limpar-filtro" type="button" title="Limpar Filtros" style="background-color: #64748b; margin-top: 0; width: auto; padding: 10px 18px; border-radius: 8px;">Ver Todos</button>
+                </div>
+            </div>
+
+            <div id="lista-relatorios" style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Preenchido pelo JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Módulos do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const dbRelatoriosRef = ref(db, 'registrosRelatorios');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay'); 
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); });
+                const fecharMenu = () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); };
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const btnAbrirForm = document.getElementById('btn-abrir-form');
+            const btnCancelar = document.getElementById('btn-cancelar');
+            const containerForm = document.getElementById('container-formulario');
+            const formRelatorio = document.getElementById('form-relatorio');
+            const dataRelatorio = document.getElementById('data-relatorio');
+            const listaRelatorios = document.getElementById('lista-relatorios');
+            const filtroMes = document.getElementById('filtro-mes-relatorio');
+            const btnLimparFiltro = document.getElementById('btn-limpar-filtro');
+
+            const dataLocal = new Date();
+            const hoje = dataLocal.getFullYear() + '-' + String(dataLocal.getMonth() + 1).padStart(2, '0') + '-' + String(dataLocal.getDate()).padStart(2, '0');
+            if(dataRelatorio) dataRelatorio.value = hoje;
+            
+            if(filtroMes) filtroMes.value = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+
+            let relatoriosGlobais = {};
+
+            if(btnAbrirForm && containerForm) {
+                btnAbrirForm.addEventListener('click', () => {
+                    containerForm.style.display = 'block';
+                    btnAbrirForm.style.display = 'none';
+                });
+            }
+
+            if(btnCancelar && containerForm && btnAbrirForm) {
+                btnCancelar.addEventListener('click', () => {
+                    containerForm.style.display = 'none';
+                    btnAbrirForm.style.display = 'block';
+                    formRelatorio.reset();
+                    if(dataRelatorio) dataRelatorio.value = hoje;
+                });
+            }
+
+            if(formRelatorio) {
+                formRelatorio.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const dataBR = dataRelatorio.value.split('-').reverse().join('/');
+                    const texto = document.getElementById('texto-relatorio').value.trim();
+
+                    const novoRegistro = {
+                        data: dataBR,
+                        texto: texto,
+                        timestamp: Date.now()
+                    };
+
+                    push(dbRelatoriosRef, novoRegistro);
+                    alert('Relatório salvo com sucesso!');
+                    
+                    containerForm.style.display = 'none';
+                    if(btnAbrirForm) btnAbrirForm.style.display = 'block';
+                    formRelatorio.reset();
+                    if(dataRelatorio) dataRelatorio.value = hoje;
+                });
+            }
+
+            onValue(dbRelatoriosRef, (snapshot) => {
+                relatoriosGlobais = snapshot.val() || {};
+                atualizarTela();
+            });
+
+            if(filtroMes) filtroMes.addEventListener('change', atualizarTela);
+            if(btnLimparFiltro) {
+                btnLimparFiltro.addEventListener('click', () => {
+                    if(filtroMes) filtroMes.value = '';
+                    atualizarTela();
+                });
+            }
+
+            function atualizarTela() {
+                if(!listaRelatorios) return;
+                listaRelatorios.innerHTML = '';
+                
+                const mesFiltroValor = filtroMes ? filtroMes.value : '';
+                let mesAnoFiltro = '';
+                if (mesFiltroValor) {
+                    const partes = mesFiltroValor.split('-');
+                    mesAnoFiltro = `${partes[1]}/${partes[0]}`;
+                }
+
+                const arrayRelatorios = Object.keys(relatoriosGlobais).map(id => {
+                    return { id: id, ...relatoriosGlobais[id] };
+                });
+
+                arrayRelatorios.sort((a, b) => b.timestamp - a.timestamp);
+
+                let qtdMostrada = 0;
+
+                arrayRelatorios.forEach(reg => {
+                    let mostrar = true;
+
+                    if (mesAnoFiltro !== "") {
+                        if (reg.data && reg.data.slice(3) !== mesAnoFiltro) {
+                            mostrar = false;
+                        }
+                    }
+
+                    if (mostrar) {
+                        qtdMostrada++;
+                        const card = document.createElement('div');
+                        card.style.cssText = 'background: white; border-left: 5px solid #0284c7; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #f1f5f9; position: relative;';
+                        
+                        const textoHTML = reg.texto.replace(/\n/g, '<br>');
+
+                        card.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <strong style="color: #475569; font-size: 1rem; display: flex; align-items: center; gap: 6px;">🗓️ ${reg.data}</strong>
+                                <button class="btn-excluir" data-id="${reg.id}" style="background-color: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; width: auto; margin-top: 0; box-shadow: none;" title="Apagar Relatório">Apagar 🗑️</button>
+                            </div>
+                            <p style="color: #1e293b; line-height: 1.6; font-size: 1.02rem;">${textoHTML}</p>
+                        `;
+                        listaRelatorios.appendChild(card);
+                    }
+                });
+
+                if (qtdMostrada === 0) {
+                    listaRelatorios.innerHTML = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Nenhum relatório encontrado para este período.</p>';
+                }
+            }
+
+            if(listaRelatorios) {
+                listaRelatorios.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('btn-excluir')) {
+                        const idFirebase = e.target.getAttribute('data-id');
+                        if (confirm("Tem certeza que deseja apagar permanentemente este relatório?")) {
+                            remove(ref(db, 'registrosRelatorios/' + idFirebase));
+                        }
+                    }
+                });
+            }
+       });
+    </script>
+
+    <!-- SCRIPT DO APLICATIVO (SERVICE WORKER) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('App Registrado com sucesso!'))
+                    .catch(err => console.log('Falha ao registrar o App: ', err));
+            });
+        }
+    </script>
+</body>
+</html>

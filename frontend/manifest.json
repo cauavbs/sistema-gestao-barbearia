@@ -1,0 +1,22 @@
+{
+  "name": "Sistema Barbearia",
+  "short_name": "Barbearia",
+  "description": "Sistema de gestão e fechamento de fichas para Barbearia.",
+  "start_url": "/login.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#c2410c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

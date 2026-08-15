@@ -1,0 +1,480 @@
+/* =========================================================
+   RESET E FONTES
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f4f7f9; /* Fundo mais suave e moderno */
+    color: #334155;
+    margin-left: 0;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.6;
+}
+
+/* =========================================================
+   BARRA DE ROLAGEM CUSTOMIZADA (SCROLLBAR)
+   ========================================================= */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* =========================================================
+   CABEÇALHO (HEADER)
+   ========================================================= */
+header {
+    background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%);
+    color: #fff;
+    padding: 18px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(154, 52, 18, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.btn-menu {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    padding: 6px 12px !important;
+    margin: 0 !important;
+    width: auto !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-menu:hover {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    transform: scale(1.05);
+}
+
+/* =========================================================
+   MENU LATERAL (SIDEBAR)
+   ========================================================= */
+.sidebar {
+    width: 280px;
+    background-color: #c2410c;
+    background-image: linear-gradient(180deg, #c2410c 0%, #7c2d12 100%);
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: -290px;
+    padding: 20px 15px;
+    box-shadow: 10px 0 25px rgba(0, 0, 0, 0.2);
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 15px;
+}
+
+.sidebar h3 {
+    font-size: 1rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #fbceb1;
+    font-weight: 700;
+}
+
+.btn-close {
+    background: rgba(0,0,0,0.1) !important;
+    border: none !important;
+    color: white !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.btn-close:hover {
+    background: rgba(0,0,0,0.3) !important;
+}
+
+.sidebar a {
+    display: block;
+    color: #f8fafc;
+    text-decoration: none;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    border: 1px solid transparent;
+}
+
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+/* O MENU ATIVO QUE VOCÊ PEDIU */
+.sidebar a.ativo, .link-admin.ativo {
+    background-color: #ffffff !important;
+    color: darkblue !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    transform: translateX(5px);
+}
+
+/* =========================================================
+   CONTAINER E CARDS (ANIMAÇÕES)
+   ========================================================= */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 16px; /* Mais arredondado */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    flex: 1;
+    min-width: 300px;
+    padding: 25px 30px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    overflow-x: auto;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+/* Atraso na animação para criar um efeito de escada (cascade) */
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+
+.full-width {
+    flex: 1 1 100% !important;
+    width: 100%;
+}
+
+h2 {
+    margin-bottom: 24px;
+    font-size: 1.3rem;
+    color: #0f172a;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* =========================================================
+   FORMULÁRIOS E INPUTS
+   ========================================================= */
+form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+form input, form select, .filtros-inputs input, .filtros-inputs select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    background-color: #f8fafc;
+    font-size: 0.95rem;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+form input:focus, form select:focus, .filtros-inputs input:focus, .filtros-inputs select:focus {
+    outline: none;
+    border-color: #c2410c;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(194, 65, 12, 0.1);
+}
+
+.select-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.select-container select {
+    flex: 1;
+}
+
+/* Botões do Menu Lateral de Ações (Editar, add barbeiro) */
+#btn-editar-barbeiro, #btn-adicionar-barbeiro, #btn-remover-barbeiro {
+    width: 46px !important;
+    height: 46px !important;
+    margin-top: 0 !important; /* Corrigido alinhamento */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#btn-editar-barbeiro:hover, #btn-adicionar-barbeiro:hover {
+    background-color: #f0fdf4 !important;
+    border-color: #22c55e !important;
+}
+#btn-remover-barbeiro:hover {
+    background-color: #fef2f2 !important;
+    border-color: #ef4444 !important;
+}
+
+/* =========================================================
+   BOTÕES GERAIS
+   ========================================================= */
+button {
+    background-color: #c2410c;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 14px;
+    border-radius: 10px;
+    margin-top: 24px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(194, 65, 12, 0.25);
+}
+
+button:hover {
+    background-color: #9a3412;
+    box-shadow: 0 6px 12px rgba(154, 52, 18, 0.3);
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(154, 52, 18, 0.2);
+}
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+.filtros-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.filtros-inputs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#btn-limpar-filtro {
+    background-color: #64748b !important;
+    box-shadow: none !important;
+    padding: 12px 18px !important;
+    margin-top: 0 !important;
+    width: auto !important;
+}
+
+#btn-limpar-filtro:hover {
+    background-color: #475569 !important;
+}
+
+#btn-exportar, #btn-pagar-visiveis {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: auto !important;
+    padding: 0 20px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================================================
+   TABELAS
+   ========================================================= */
+table {
+    width: 100%;
+    border-collapse: separate; /* Muda para separate para bordas arredondadas funcionarem */
+    border-spacing: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+th, td {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+    font-size: 0.95rem;
+    white-space: nowrap; /* Evita quebra de linha feia no celular */
+}
+
+th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* Linha Paga - Destaque suave */
+tr.linha-paga td {
+    background-color: #f0fdf4 !important;
+    border-bottom: 1px solid #dcfce7;
+}
+
+tr.linha-paga:hover td {
+    background-color: #dcfce7 !important;
+}
+
+/* Botão de Excluir da Tabela */
+.btn-excluir {
+    background-color: #fef2f2 !important;
+    color: #ef4444 !important;
+    padding: 8px 14px !important;
+    margin-top: 0 !important;
+    width: auto !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    box-shadow: none !important;
+    border: 1px solid #fca5a5 !important;
+}
+
+.btn-excluir:hover {
+    background-color: #ef4444 !important;
+    color: white !important;
+}
+
+/* =========================================================
+   OVERLAY (FUNDO ESCURO DO MENU)
+   ========================================================= */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* =========================================================
+   RESPONSIVIDADE (CELULARES)
+   ========================================================= */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+        margin: 20px auto;
+    }
+    
+    .card {
+        padding: 20px 15px;
+    }
+    
+    .filtros-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filtros-inputs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    header h1 {
+        font-size: 1.2rem;
+    }
+}

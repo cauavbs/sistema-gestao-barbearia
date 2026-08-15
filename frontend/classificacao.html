@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <!-- OVERLAY E BARRA LATERAL -->
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin ativo">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <!-- TOPO -->
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Classificação e Troco</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- BLOCO 1: CALCULADORA DE CAIXA -->
+        <section class="card full-width" style="border-top: 5px solid darkblue;">
+            <h2 style="color: darkblue;">🧮 Calcular Caixa do Dia</h2>
+            <form id="form-caixa">
+                
+                <!-- Dados Básicos -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label for="data-caixa">🗓️ Data:</label>
+                        <input type="date" id="data-caixa" required>
+                    </div>
+                    <div>
+                        <label for="troco-inicial">💵 Troco Inicial (R$):</label>
+                        <input type="number" id="troco-inicial" min="0" step="0.01" value="50.00" required>
+                    </div>
+                    <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                        <span style="font-size: 0.9rem; color: #1e3a8a; font-weight: 600; text-transform: uppercase;">Fichas Puxadas (Dia)</span>
+                        <span id="display-fichas-dia" style="font-size: 2rem; font-weight: bold; color: darkblue;">0</span>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+                <p style="font-weight: 600; color: #475569; margin-bottom: 10px;">Lançamento de Cartões e Pix:</p>
+
+                <!-- Grid de Formas de Pagamento -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                    <div>
+                        <label for="fichas-pix">PIX:</label>
+                        <input type="number" id="fichas-pix" min="0" value="0" required>
+                    </div>
+                    
+                    <div>
+                        <label for="fichas-debito" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span>Débito 1: <small id="label-taxa-debito" style="color: #64748b; font-weight: normal;">(0%)</small></span>
+                            <button type="button" id="btn-taxa-debito" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; font-size: 1rem; width: auto; box-shadow: none;" title="Editar taxa">✏️</button>
+                        </label>
+                        <input type="number" id="fichas-debito" min="0" value="0" required>
+                    </div>
+                    
+                    <div>
+                        <label for="fichas-debito2" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span>Débito 2: <small id="label-taxa-debito2" style="color: #64748b; font-weight: normal;">(0%)</small></span>
+                            <button type="button" id="btn-taxa-debito2" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; font-size: 1rem; width: auto; box-shadow: none;" title="Editar taxa">✏️</button>
+                        </label>
+                        <input type="number" id="fichas-debito2" min="0" value="0" required>
+                    </div>
+                    
+                    <div>
+                        <label for="fichas-credito" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span>Crédito 1: <small id="label-taxa-credito" style="color: #64748b; font-weight: normal;">(0%)</small></span>
+                            <button type="button" id="btn-taxa-credito" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; font-size: 1rem; width: auto; box-shadow: none;" title="Editar taxa">✏️</button>
+                        </label>
+                        <input type="number" id="fichas-credito" min="0" value="0" required>
+                    </div>
+                    
+                    <div>
+                        <label for="fichas-credito2" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span>Crédito 2: <small id="label-taxa-credito2" style="color: #64748b; font-weight: normal;">(0%)</small></span>
+                            <button type="button" id="btn-taxa-credito2" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; font-size: 1rem; width: auto; box-shadow: none;" title="Editar taxa">✏️</button>
+                        </label>
+                        <input type="number" id="fichas-credito2" min="0" value="0" required>
+                    </div>
+                </div>
+
+                <button type="submit" style="background-color: darkblue; margin-top: 30px; font-size: 1.1rem;">Salvar Fechamento de Caixa ✔️</button>
+            </form>
+        </section>
+
+        <!-- BLOCO 2: RESULTADOS DA CLASSIFICAÇÃO (WIDGETS) -->
+        <section class="card full-width" style="border-top: 5px solid #10b981;">
+            <h2 style="color: #15803d;">✅ Resultado do Caixa</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px;">
+                <!-- Dinheiro Fisico -->
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">Em Dinheiro (<span id="display-fichas-dinheiro">0</span> fichas)</p>
+                    <p id="display-valor-dinheiro" style="font-size: 2rem; font-weight: 700; color: #0f172a; margin-top: 5px;">R$ 0,00</p>
+                </div>
+                
+                <!-- Digital -->
+                <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #166534; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">Digital (Líquido)</p>
+                    <p id="display-digital-liquido" style="font-size: 2rem; font-weight: 700; color: #15803d; margin-top: 5px;">R$ 0,00</p>
+                    <p style="font-size: 0.85rem; color: #ef4444; margin-top: 8px; font-weight: 500;">Desconto Taxas: <span id="display-desconto-taxas">- R$ 0,00</span></p>
+                </div>
+            </div>
+            
+            <!-- Gaveta Final -->
+            <div style="margin-top: 20px; padding: 25px; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);">
+                <p style="font-size: 1.1rem; font-weight: 500; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Valor Final Esperado na Gaveta</p>
+                <p id="display-total-caixa" style="font-size: 3rem; font-weight: 700; margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">R$ 50,00</p>
+                <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">(Troco Inicial + Fichas em Dinheiro)</p>
+            </div>
+        </section>
+
+        <!-- BLOCO 3: HISTÓRICO DE CAIXAS -->
+        <section class="card full-width">
+            <h2>📋 Histórico de Caixas Salvos</h2>
+
+            <div class="filtros-container">
+                <div class="filtros-inputs" style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="date" id="filtro-data-inicio" title="Data Inicial">
+                        <span style="font-weight: 500; color: #94a3b8;">até</span>
+                        <input type="date" id="filtro-data-fim" title="Data Final">
+                    </div>
+                    <button id="btn-limpar-filtro" type="button" title="Limpar Filtros">Limpar Filtros</button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="btn-exportar" style="background-color: darkblue; color: white;" title="Baixar Planilha Excel">📥 Exportar Excel</button>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Troco Inicial</th>
+                            <th>Fichas Totais</th>
+                            <th>Pix</th>
+                            <th>Déb. 1</th>
+                            <th>Déb. 2</th>
+                            <th>Créd. 1</th>
+                            <th>Créd. 2</th>
+                            <th>Fichas Dinheiro</th>
+                            <th>Total Gaveta (R$)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-caixas"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const dbCaixaRef = ref(db, 'registrosCaixa');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const dataCaixa = document.getElementById('data-caixa');
+            const trocoInicial = document.getElementById('troco-inicial');
+            const fichasPix = document.getElementById('fichas-pix');
+            const fichasDebito = document.getElementById('fichas-debito');
+            const fichasDebito2 = document.getElementById('fichas-debito2');
+            const fichasCredito = document.getElementById('fichas-credito');
+            const fichasCredito2 = document.getElementById('fichas-credito2');
+            const formCaixa = document.getElementById('form-caixa');
+            const listaCaixas = document.getElementById('lista-caixas');
+            const btnExportar = document.getElementById('btn-exportar');
+
+            const dataLocal = new Date();
+            const hoje = dataLocal.getFullYear() + '-' + String(dataLocal.getMonth() + 1).padStart(2, '0') + '-' + String(dataLocal.getDate()).padStart(2, '0');
+            if(dataCaixa) dataCaixa.value = hoje;
+
+            // TAXAS NA MEMÓRIA
+            let taxaDebito = parseFloat(localStorage.getItem('taxaDebitoBarbearia')) || 0;
+            let taxaDebito2 = parseFloat(localStorage.getItem('taxaDebito2Barbearia')) || 0;
+            let taxaCredito = parseFloat(localStorage.getItem('taxaCreditoBarbearia')) || 0;
+            let taxaCredito2 = parseFloat(localStorage.getItem('taxaCredito2Barbearia')) || 0;
+            
+            const labelTaxaDebito = document.getElementById('label-taxa-debito');
+            const labelTaxaDebito2 = document.getElementById('label-taxa-debito2');
+            const labelTaxaCredito = document.getElementById('label-taxa-credito');
+            const labelTaxaCredito2 = document.getElementById('label-taxa-credito2');
+            
+            function atualizarLabelsTaxas() {
+                if(labelTaxaDebito) labelTaxaDebito.textContent = `(${taxaDebito.toFixed(2)}%)`;
+                if(labelTaxaDebito2) labelTaxaDebito2.textContent = `(${taxaDebito2.toFixed(2)}%)`;
+                if(labelTaxaCredito) labelTaxaCredito.textContent = `(${taxaCredito.toFixed(2)}%)`;
+                if(labelTaxaCredito2) labelTaxaCredito2.textContent = `(${taxaCredito2.toFixed(2)}%)`;
+            }
+            atualizarLabelsTaxas();
+
+            // BOTÕES DE EDITAR TAXA
+            if(document.getElementById('btn-taxa-debito')) {
+                document.getElementById('btn-taxa-debito').addEventListener('click', function() {
+                    const nova = prompt("Digite a taxa da máquina para DÉBITO 1 (ex: 1,99):", taxaDebito);
+                    if (nova !== null && nova.trim() !== '') {
+                        taxaDebito = parseFloat(nova.replace(',', '.'));
+                        localStorage.setItem('taxaDebitoBarbearia', taxaDebito);
+                        atualizarLabelsTaxas(); calcularCaixa();
+                    }
+                });
+            }
+            if(document.getElementById('btn-taxa-debito2')) {
+                document.getElementById('btn-taxa-debito2').addEventListener('click', function() {
+                    const nova = prompt("Digite a taxa da máquina para DÉBITO 2 (ex: 1,99):", taxaDebito2);
+                    if (nova !== null && nova.trim() !== '') {
+                        taxaDebito2 = parseFloat(nova.replace(',', '.'));
+                        localStorage.setItem('taxaDebito2Barbearia', taxaDebito2);
+                        atualizarLabelsTaxas(); calcularCaixa();
+                    }
+                });
+            }
+            if(document.getElementById('btn-taxa-credito')) {
+                document.getElementById('btn-taxa-credito').addEventListener('click', function() {
+                    const nova = prompt("Digite a taxa da máquina para CRÉDITO 1 (ex: 4,99):", taxaCredito);
+                    if (nova !== null && nova.trim() !== '') {
+                        taxaCredito = parseFloat(nova.replace(',', '.'));
+                        localStorage.setItem('taxaCreditoBarbearia', taxaCredito);
+                        atualizarLabelsTaxas(); calcularCaixa();
+                    }
+                });
+            }
+            if(document.getElementById('btn-taxa-credito2')) {
+                document.getElementById('btn-taxa-credito2').addEventListener('click', function() {
+                    const nova = prompt("Digite a taxa da máquina para CRÉDITO 2 (ex: 4,99):", taxaCredito2);
+                    if (nova !== null && nova.trim() !== '') {
+                        taxaCredito2 = parseFloat(nova.replace(',', '.'));
+                        localStorage.setItem('taxaCredito2Barbearia', taxaCredito2);
+                        atualizarLabelsTaxas(); calcularCaixa();
+                    }
+                });
+            }
+
+            let registrosCaixaGlobais = {};
+            let registrosCortesGlobais = {};
+
+            onValue(ref(db, 'registrosBarbearia'), (snapshot) => {
+                registrosCortesGlobais = snapshot.val() || {};
+                calcularCaixa();
+            });
+
+            function getFichasDoDia(dataBR) {
+                let totalFichas = 0;
+                Object.values(registrosCortesGlobais).forEach(reg => {
+                    if (reg.data === dataBR) { totalFichas += parseInt(reg.fichas) || 0; }
+                });
+                return totalFichas;
+            }
+
+            function calcularCaixa() {
+                if(!dataCaixa) return;
+                const dataBR = dataCaixa.value.split('-').reverse().join('/');
+                const totalFichasDia = getFichasDoDia(dataBR);
+                
+                const displayFichas = document.getElementById('display-fichas-dia');
+                if(displayFichas) displayFichas.textContent = totalFichasDia;
+
+                const troco = parseFloat(trocoInicial.value) || 0;
+                const pix = parseInt(fichasPix.value) || 0;
+                const debito = parseInt(fichasDebito.value) || 0;
+                const debito2 = parseInt(fichasDebito2.value) || 0;
+                const credito = parseInt(fichasCredito.value) || 0;
+                const credito2 = parseInt(fichasCredito2.value) || 0;
+                
+                const totalDigital = pix + debito + debito2 + credito + credito2;
+                let fichasDinheiro = totalFichasDia - totalDigital;
+                if (fichasDinheiro < 0) fichasDinheiro = 0;
+
+                const displayDinheiro = document.getElementById('display-fichas-dinheiro');
+                if(displayDinheiro) displayDinheiro.textContent = fichasDinheiro;
+
+                const valorPorFicha = 20.00;
+                const valorEmDinheiro = fichasDinheiro * valorPorFicha;
+                const totalNaGaveta = troco + valorEmDinheiro;
+
+                const brutoPix = pix * valorPorFicha;
+                const brutoDebito = debito * valorPorFicha;
+                const brutoDebito2 = debito2 * valorPorFicha;
+                const brutoCredito = credito * valorPorFicha;
+                const brutoCredito2 = credito2 * valorPorFicha;
+                
+                const descontoDebito = brutoDebito * (taxaDebito / 100);
+                const descontoDebito2 = brutoDebito2 * (taxaDebito2 / 100);
+                const descontoCredito = brutoCredito * (taxaCredito / 100);
+                const descontoCredito2 = brutoCredito2 * (taxaCredito2 / 100);
+                
+                const totalDesconto = descontoDebito + descontoDebito2 + descontoCredito + descontoCredito2;
+                const digitalLiquido = (brutoPix + brutoDebito + brutoDebito2 + brutoCredito + brutoCredito2) - totalDesconto;
+
+                const elValDin = document.getElementById('display-valor-dinheiro');
+                if(elValDin) elValDin.textContent = valorEmDinheiro.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                const elDescTax = document.getElementById('display-desconto-taxas');
+                if(elDescTax) elDescTax.textContent = "- " + totalDesconto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                const elDigLiq = document.getElementById('display-digital-liquido');
+                if(elDigLiq) elDigLiq.textContent = digitalLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                const elTotCx = document.getElementById('display-total-caixa');
+                if(elTotCx) elTotCx.textContent = totalNaGaveta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+
+            if(dataCaixa) dataCaixa.addEventListener('change', function() { calcularCaixa(); atualizarTabelaCaixa(); });
+            if(trocoInicial) trocoInicial.addEventListener('input', calcularCaixa);
+            if(fichasPix) fichasPix.addEventListener('input', calcularCaixa);
+            if(fichasDebito) fichasDebito.addEventListener('input', calcularCaixa);
+            if(fichasDebito2) fichasDebito2.addEventListener('input', calcularCaixa);
+            if(fichasCredito) fichasCredito.addEventListener('input', calcularCaixa);
+            if(fichasCredito2) fichasCredito2.addEventListener('input', calcularCaixa);
+
+            calcularCaixa();
+
+            if(formCaixa) {
+                formCaixa.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const dataBR = dataCaixa.value.split('-').reverse().join('/');
+                    const totalFichasDia = getFichasDoDia(dataBR);
+                    
+                    const troco = parseFloat(trocoInicial.value) || 0;
+                    const pix = parseInt(fichasPix.value) || 0;
+                    const debito = parseInt(fichasDebito.value) || 0;
+                    const debito2 = parseInt(fichasDebito2.value) || 0;
+                    const credito = parseInt(fichasCredito.value) || 0;
+                    const credito2 = parseInt(fichasCredito2.value) || 0;
+                    
+                    const totalDigital = pix + debito + debito2 + credito + credito2;
+                    let fichasDinheiro = totalFichasDia - totalDigital;
+                    if (fichasDinheiro < 0) fichasDinheiro = 0;
+
+                    const valorPorFicha = 20.00;
+                    const totalNaGaveta = troco + (fichasDinheiro * valorPorFicha);
+                    
+                    const totalDesconto = 
+                        (debito * valorPorFicha * (taxaDebito / 100)) + 
+                        (debito2 * valorPorFicha * (taxaDebito2 / 100)) + 
+                        (credito * valorPorFicha * (taxaCredito / 100)) +
+                        (credito2 * valorPorFicha * (taxaCredito2 / 100));
+                        
+                    const digitalLiquido = ((pix + debito + debito2 + credito + credito2) * valorPorFicha) - totalDesconto;
+
+                    const novoRegistro = {
+                        data: dataBR,
+                        troco: troco,
+                        totalFichas: totalFichasDia,
+                        pix: pix,
+                        debito: debito,
+                        debito2: debito2,
+                        credito: credito,
+                        credito2: credito2,
+                        fichasDinheiro: fichasDinheiro,
+                        taxasMaquina: totalDesconto,
+                        digitalLiquido: digitalLiquido,
+                        totalGaveta: totalNaGaveta,
+                        totalGavetaTexto: totalNaGaveta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                    };
+
+                    push(dbCaixaRef, novoRegistro);
+                    alert('Fechamento de caixa salvo com sucesso!');
+                    
+                    fichasPix.value = 0; fichasDebito.value = 0; fichasDebito2.value = 0; fichasCredito.value = 0; fichasCredito2.value = 0;
+                    calcularCaixa();
+                });
+            }
+
+            onValue(dbCaixaRef, (snapshot) => {
+                registrosCaixaGlobais = snapshot.val() || {};
+                atualizarTabelaCaixa();
+            });
+
+            const fInicio = document.getElementById('filtro-data-inicio');
+            const fFim = document.getElementById('filtro-data-fim');
+            const btnLimpar = document.getElementById('btn-limpar-filtro');
+
+            if(fInicio) fInicio.addEventListener('change', atualizarTabelaCaixa);
+            if(fFim) fFim.addEventListener('change', atualizarTabelaCaixa);
+            if(btnLimpar) {
+                btnLimpar.addEventListener('click', function() {
+                    if(fInicio) fInicio.value = '';
+                    if(fFim) fFim.value = '';
+                    atualizarTabelaCaixa();
+                });
+            }
+
+            function atualizarTabelaCaixa() {
+                if(!listaCaixas) return;
+                listaCaixas.innerHTML = '';
+
+                const dataSelecionadaForm = dataCaixa ? dataCaixa.value : ''; 
+                const dataSelecionadaBR = dataSelecionadaForm ? dataSelecionadaForm.split('-').reverse().join('/') : ''; 
+                const mesAnoSelecionado = dataSelecionadaBR ? dataSelecionadaBR.slice(3) : ''; 
+
+                const fDataInicio = fInicio ? fInicio.value : '';
+                const fDataFim = fFim ? fFim.value : '';
+                const usandoFiltros = fDataInicio !== "" || fDataFim !== "";
+
+                Object.keys(registrosCaixaGlobais).forEach((idFirebase) => {
+                    const reg = registrosCaixaGlobais[idFirebase];
+                    let mostrar = true;
+
+                    if (usandoFiltros) {
+                        const p = reg.data.split('/');
+                        const dataISO = `${p[2]}-${p[1]}-${p[0]}`; 
+                        if (fDataInicio !== "" && dataISO < fDataInicio) mostrar = false;
+                        if (fDataFim !== "" && dataISO > fDataFim) mostrar = false;
+                    } else {
+                        if (reg.data && reg.data.slice(3) !== mesAnoSelecionado) {
+                            mostrar = false;
+                        }
+                    }
+
+                    if (mostrar) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${reg.data}</td>
+                            <td>R$ ${reg.troco.toFixed(2).replace('.', ',')}</td>
+                            <td>${reg.totalFichas}</td>
+                            <td>${reg.pix || 0}</td>
+                            <td>${reg.debito || 0}</td>
+                            <td>${reg.debito2 || 0}</td>
+                            <td>${reg.credito || 0}</td>
+                            <td>${reg.credito2 || 0}</td>
+                            <td><strong>${reg.fichasDinheiro}</strong></td>
+                            <td style="color: #15803d; font-weight: bold;">${reg.totalGavetaTexto}</td>
+                            <td>
+                                <button class="btn-excluir" data-id="${idFirebase}">Excluir</button>
+                            </td>
+                        `;
+                        listaCaixas.appendChild(tr);
+                    }
+                });
+            }
+
+            if(listaCaixas) {
+                listaCaixas.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('btn-excluir')) {
+                        const idFirebase = e.target.getAttribute('data-id');
+                        if (confirm("Deseja apagar este fechamento de caixa?")) {
+                            remove(ref(db, 'registrosCaixa/' + idFirebase));
+                        }
+                    }
+                });
+            }
+
+            if (btnExportar) {
+                btnExportar.addEventListener('click', function () {
+                    const chaves = Object.keys(registrosCaixaGlobais);
+                    if (chaves.length === 0) {
+                        alert("Não há dados para exportar!");
+                        return;
+                    }
+
+                    let csvContent = "\uFEFFData;Troco Inicial;Fichas Totais;Pix;Débito 1;Débito 2;Crédito 1;Crédito 2;Fichas Dinheiro;Total Gaveta\n";
+
+                    chaves.forEach((id) => {
+                        const reg = registrosCaixaGlobais[id];
+                        let t = reg.troco.toFixed(2).replace('.', ',');
+                        csvContent += `${reg.data};R$ ${t};${reg.totalFichas};${reg.pix || 0};${reg.debito || 0};${reg.debito2 || 0};${reg.credito || 0};${reg.credito2 || 0};${reg.fichasDinheiro};${reg.totalGavetaTexto}\n`;
+                    });
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", "fechamento_caixa_troco.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay'); 
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); });
+                const fecharMenu = () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); };
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+        });
+    </script>
+</body>
+
+</html>

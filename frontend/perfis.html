@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin ativo">Gestão de Perfis 👤</a>
+    </nav>
+
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Gestão de Acessos e Perfis</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- Lista de barbeiros para o Autocomplete (oculto) -->
+        <datalist id="opcoes-barbeiros"></datalist>
+
+        <!-- Bloco 1: Criar Conta -->
+        <section class="card full-width" style="border-top: 5px solid #2563eb;">
+            <h2 style="color: #1d4ed8;">👤 Criar Conta para Funcionário</h2>
+            <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 20px;">Vincule este perfil a um barbeiro selecionando o nome dele na lista ou digite um novo nome.</p>
+            
+            <form id="form-perfil">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                    <div class="mb-3">
+                        <label for="nome-usuario">🏷️ Nome / Barbeiro:</label>
+                        <input type="text" id="nome-usuario" list="opcoes-barbeiros" placeholder="Selecione ou digite..." required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email-usuario">✉️ E-mail de Login:</label>
+                        <input type="email" id="email-usuario" placeholder="lucas@barbearia.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="senha-usuario">🔒 Senha (Mín. 6 caracteres):</label>
+                        <input type="text" id="senha-usuario" placeholder="Mínimo 6 dígitos" required minlength="6">
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo-perfil">🛡️ Nível de Acesso:</label>
+                        <select id="tipo-perfil" required>
+                            <option value="barbeiro">Barbeiro (Acesso Restrito)</option>
+                            <option value="master">Master (Acesso Total)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" style="background-color: #2563eb; margin-top: 25px; padding: 15px; font-size: 1.1rem;">Criar Conta de Acesso ✔️</button>
+            </form>
+        </section>
+
+        <!-- Bloco 2: Lista de Perfis Criados -->
+        <section class="card full-width" style="margin-top: 20px;">
+            <h2>📋 Perfis Cadastrados no Sistema</h2>
+            <div style="overflow-x: auto; margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Barbeiro Vinculado</th>
+                            <th>E-mail</th>
+                            <th>Senha</th>
+                            <th>Nível de Acesso</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-usuarios">
+                        <!-- Preenchido automaticamente pelo Firebase -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- MODAL DE EDIÇÃO DE PERFIL -->
+        <div id="modal-editar" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; padding: 15px;">
+            <div class="card" style="width: 100%; max-width: 500px; position: relative; margin: 0; border-top: 5px solid #f59e0b; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+                <button id="btn-fechar-modal" type="button" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #475569; width: auto; margin: 0; box-shadow: none;">✕</button>
+                <h2 style="color: #d97706; margin-bottom: 20px;">✏️ Editar Perfil</h2>
+                
+                <form id="form-editar">
+                    <input type="hidden" id="edit-uid">
+                    <input type="hidden" id="edit-senha-antiga">
+                    
+                    <div class="mb-3" style="margin-bottom: 15px;">
+                        <label>🏷️ Vincular a qual Barbeiro?</label>
+                        <input type="text" id="edit-nome" list="opcoes-barbeiros" required autocomplete="off">
+                    </div>
+                    <div class="mb-3" style="margin-bottom: 15px;">
+                        <label>✉️ E-mail de Login:</label>
+                        <input type="email" id="edit-email" required readonly title="Por segurança, o e-mail não pode ser alterado." style="background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed;">
+                        <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 4px;">*Para mudar o e-mail, exclua o perfil e crie outro.</small>
+                    </div>
+                    <div class="mb-3" style="margin-bottom: 15px;">
+                        <label>🔒 Nova Senha (Mínimo 6 caracteres):</label>
+                        <input type="text" id="edit-senha" required minlength="6">
+                    </div>
+                    <div class="mb-3" style="margin-bottom: 20px;">
+                        <label>🛡️ Nível de Acesso:</label>
+                        <select id="edit-perfil" required>
+                            <option value="barbeiro">Barbeiro (Acesso Restrito)</option>
+                            <option value="master">Master (Acesso Total)</option>
+                        </select>
+                    </div>
+                    <button type="submit" style="background-color: #f59e0b; color: white; padding: 14px; font-size: 1.05rem;">Salvar Alterações ✔️</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, set, get, child, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const appSecundaria = initializeApp(firebaseConfig, "AppSecundaria");
+        const authSecundaria = getAuth(appSecundaria);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) window.location.href = '/login.html';
+            else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas perfis Master podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        const btnSair = document.getElementById('btn-sair');
+        if(btnSair) {
+            btnSair.addEventListener('click', () => {
+                signOut(auth).then(() => window.location.href = '/login.html');
+            });
+        }
+
+        function carregarOpcoesBarbeiros() {
+            const listaBarbeiros = JSON.parse(localStorage.getItem('barbeirosBarbearia')) || [];
+            const datalist = document.getElementById('opcoes-barbeiros');
+            let html = '';
+            listaBarbeiros.forEach(nome => {
+                html += `<option value="${nome}">`;
+            });
+            if(datalist) datalist.innerHTML = html;
+        }
+        carregarOpcoesBarbeiros();
+
+        const listaUsuariosEl = document.getElementById('lista-usuarios');
+        onValue(ref(db, 'usuarios'), (snapshot) => {
+            if(!listaUsuariosEl) return;
+            listaUsuariosEl.innerHTML = '';
+            const usuarios = snapshot.val() || {};
+
+            Object.keys(usuarios).forEach(uid => {
+                const u = usuarios[uid];
+                const tr = document.createElement('tr');
+                
+                const nivelFormatado = u.perfil === 'master' ? '<strong style="color: #1d4ed8; background: #eff6ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bfdbfe;">Master (Total)</strong>' : '<span style="color: #0284c7; background: #f0f9ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd;">Barbeiro (Restrito)</span>';
+                const senhaExibida = u.senha ? u.senha : '<span style="color: #94a3b8;">Não registrada</span>';
+
+                tr.innerHTML = `
+                    <td><strong>${u.nome}</strong></td>
+                    <td>${u.email}</td>
+                    <td>${senhaExibida}</td>
+                    <td>${nivelFormatado}</td>
+                    <td style="display: flex; gap: 8px; align-items: center;">
+                        <button class="btn-editar" data-uid="${uid}" data-nome="${u.nome}" data-email="${u.email}" data-senha="${u.senha || ''}" data-perfil="${u.perfil}" style="background-color: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; width: auto; margin: 0; box-shadow: none;">Editar ✏️</button>
+                        <button class="btn-excluir" data-uid="${uid}" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; width: auto; margin: 0; box-shadow: none;">Excluir 🗑️</button>
+                    </td>
+                `;
+                listaUsuariosEl.appendChild(tr);
+            });
+        });
+
+        if(listaUsuariosEl) {
+            listaUsuariosEl.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-excluir')) {
+                    const uid = e.target.getAttribute('data-uid');
+                    if (confirm("Deseja remover o acesso deste usuário do sistema?")) {
+                        remove(ref(db, 'usuarios/' + uid));
+                        alert("Acesso removido com sucesso!");
+                    }
+                }
+
+                if (e.target.classList.contains('btn-editar')) {
+                    document.getElementById('edit-uid').value = e.target.getAttribute('data-uid');
+                    document.getElementById('edit-nome').value = e.target.getAttribute('data-nome');
+                    document.getElementById('edit-email').value = e.target.getAttribute('data-email');
+                    
+                    const senhaRecuperada = e.target.getAttribute('data-senha');
+                    document.getElementById('edit-senha').value = senhaRecuperada;
+                    document.getElementById('edit-senha-antiga').value = senhaRecuperada;
+                    
+                    document.getElementById('edit-perfil').value = e.target.getAttribute('data-perfil');
+                    
+                    document.getElementById('modal-editar').style.display = 'flex';
+                }
+            });
+        }
+
+        const btnFecharModal = document.getElementById('btn-fechar-modal');
+        if(btnFecharModal) {
+            btnFecharModal.addEventListener('click', () => {
+                document.getElementById('modal-editar').style.display = 'none';
+            });
+        }
+
+        const formEditar = document.getElementById('form-editar');
+        if(formEditar) {
+            formEditar.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const btnSubmit = e.target.querySelector('button[type="submit"]');
+                btnSubmit.textContent = "Salvando...";
+                btnSubmit.disabled = true;
+
+                const uid = document.getElementById('edit-uid').value;
+                const email = document.getElementById('edit-email').value;
+                const senhaAntiga = document.getElementById('edit-senha-antiga').value;
+                const novaSenha = document.getElementById('edit-senha').value;
+                const novoNome = document.getElementById('edit-nome').value.trim();
+                const novoPerfil = document.getElementById('edit-perfil').value;
+
+                try {
+                    if (senhaAntiga !== "" && novaSenha !== senhaAntiga) {
+                        const credencial = await signInWithEmailAndPassword(authSecundaria, email, senhaAntiga);
+                        await updatePassword(credencial.user, novaSenha);
+                        await signOut(authSecundaria);
+                    }
+
+                    await update(ref(db, 'usuarios/' + uid), {
+                        nome: novoNome,
+                        senha: novaSenha,
+                        perfil: novoPerfil
+                    });
+
+                    alert("Perfil atualizado com sucesso!");
+                    document.getElementById('modal-editar').style.display = 'none';
+                } catch (erro) {
+                    alert("Erro ao atualizar o perfil. Se a senha antiga estiver corrompida, você precisará excluir este perfil e criar um novo.\n\nDetalhes do erro: " + erro.message);
+                } finally {
+                    btnSubmit.textContent = "Salvar Alterações ✔️";
+                    btnSubmit.disabled = false;
+                }
+            });
+        }
+
+        const formPerfil = document.getElementById('form-perfil');
+        if(formPerfil) {
+            formPerfil.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nome = document.getElementById('nome-usuario').value.trim();
+                const email = document.getElementById('email-usuario').value.trim();
+                const senha = document.getElementById('senha-usuario').value;
+                const perfil = document.getElementById('tipo-perfil').value;
+
+                const btnSubmit = e.target.querySelector('button[type="submit"]');
+                btnSubmit.textContent = "Criando...";
+                btnSubmit.disabled = true;
+
+                try {
+                    const credencial = await createUserWithEmailAndPassword(authSecundaria, email, senha);
+                    await set(ref(db, 'usuarios/' + credencial.user.uid), {
+                        nome: nome,
+                        email: email,
+                        senha: senha,
+                        perfil: perfil
+                    });
+                    await signOut(authSecundaria); 
+                    alert(`Perfil de ${nome} criado com sucesso!`);
+                    formPerfil.reset();
+                } catch (erro) {
+                    alert("Erro ao criar perfil: " + erro.message);
+                } finally {
+                    btnSubmit.textContent = "Criar Conta de Acesso ✔️";
+                    btnSubmit.disabled = false;
+                }
+            });
+        }
+
+        const btnToggle = document.getElementById('btn-toggle-sidebar');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+
+        if(btnToggle && sidebar && overlay && btnCloseSidebar) {
+            btnToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); });
+            overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); });
+            btnCloseSidebar.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); });
+        }
+    </script>
+
+    <!-- SCRIPT DO APLICATIVO (SERVICE WORKER) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('App Registrado com sucesso!'))
+                    .catch(err => console.log('Falha ao registrar o App: ', err));
+            });
+        }
+    </script>
+</body>
+</html>

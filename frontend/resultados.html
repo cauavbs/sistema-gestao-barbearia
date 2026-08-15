@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <!-- OVERLAY E BARRA LATERAL -->
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin ativo">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <!-- TOPO -->
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Resultados do Mês</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- Filtro de Mês -->
+        <section class="card full-width" style="border-top: 5px solid #1e293b;">
+            <h2 style="color: #1e293b;">🗓️ Selecione o Mês e Ano</h2>
+            <div class="filtros-inputs" style="margin-top: 10px;">
+                <input type="month" id="mes-filtro" style="padding: 12px 16px; font-size: 1rem; cursor: pointer; max-width: 280px; border-radius: 10px; border: 1.5px solid #e2e8f0; background-color: #f8fafc;">
+            </div>
+        </section>
+
+        <!-- Grid de Entradas e Saídas -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; width: 100%;">
+            
+            <!-- Card de Entradas -->
+            <section class="card" style="border-top: 5px solid #10b981; margin: 0;">
+                <h2 style="color: #15803d;">💰 Entradas</h2>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                    <p style="display: flex; justify-content: space-between; align-items: center;"><span>Faturamento Bruto (Cortes):</span> <strong id="res-cortes" style="color: #0f172a;">R$ 0,00</strong></p>
+                    <p style="display: flex; justify-content: space-between; align-items: center;"><span>Vendas do Freezer:</span> <strong id="res-freezer" style="color: #0f172a;">R$ 0,00</strong></p>
+                </div>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <p style="display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem;">
+                    <span>Total de Entradas:</span> 
+                    <strong id="res-entradas-total" style="color: #15803d; font-size: 1.3rem;">R$ 0,00</strong>
+                </p>
+            </section>
+
+            <!-- Card de Saídas -->
+            <section class="card" style="border-top: 5px solid #ef4444; margin: 0;">
+                <h2 style="color: #b91c1c;">💸 Saídas</h2>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                    <p style="display: flex; justify-content: space-between; align-items: center;"><span>Insumos e Contas pagas:</span> <strong id="res-insumos" style="color: #0f172a;">R$ 0,00</strong></p>
+                    <p style="display: flex; justify-content: space-between; align-items: center;"><span>Taxas de Máquina (Cartão):</span> <strong id="res-taxas" style="color: #ef4444;">R$ 0,00</strong></p>
+                </div>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <p style="display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem;">
+                    <span>Total de Saídas:</span> 
+                    <strong id="res-saidas-total" style="color: #b91c1c; font-size: 1.3rem;">R$ 0,00</strong>
+                </p>
+            </section>
+
+        </div>
+
+        <!-- Card do Lucro Líquido -->
+        <section class="card full-width" style="border-top: 5px solid #1d4ed8; text-align: center; padding: 35px 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <h2 style="color: #1e3a8a; justify-content: center;">📊 Resultado Líquido do Mês</h2>
+            <p style="font-size: 3rem; margin-top: 15px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.03);" id="res-lucro">R$ 0,00</p>
+        </section>
+    </main>
+
+    <!-- Módulos do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, get, child, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const mesFiltroEl = document.getElementById('mes-filtro');
+            const hoje = new Date();
+            const anoAtual = hoje.getFullYear();
+            const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+            if(mesFiltroEl) mesFiltroEl.value = `${anoAtual}-${mesAtual}`;
+
+            let dadosFreezer = {};
+            let dadosInsumos = {};
+            let dadosCaixa = {};
+            let dadosCortes = {};
+
+            onValue(ref(db, 'registrosBarbearia'), (snapshot) => {
+                dadosCortes = snapshot.val() || {};
+                calcularResumo();
+            });
+
+            onValue(ref(db, 'registrosCaixa'), (snapshot) => {
+                dadosCaixa = snapshot.val() || {};
+                calcularResumo();
+            });
+
+            onValue(ref(db, 'registrosFreezer'), (snapshot) => {
+                dadosFreezer = snapshot.val() || {};
+                calcularResumo();
+            });
+
+            onValue(ref(db, 'registrosInsumos'), (snapshot) => {
+                dadosInsumos = snapshot.val() || {};
+                calcularResumo();
+            });
+
+            if(mesFiltroEl) mesFiltroEl.addEventListener('change', calcularResumo);
+
+            function calcularResumo() {
+                const mesAnoSelecionado = mesFiltroEl ? mesFiltroEl.value : '';
+                if (!mesAnoSelecionado) return;
+                
+                const partes = mesAnoSelecionado.split('-');
+                const mesAnoBR = `${partes[1]}/${partes[0]}`;
+
+                let totalCortes = 0;
+                let totalFreezer = 0;
+                let totalInsumos = 0;
+                let totalTaxas = 0;
+
+                Object.values(dadosCortes).forEach(registro => {
+                    if (registro.data && registro.data.slice(3) === mesAnoBR) {
+                        totalCortes += (registro.faturamento || 0); 
+                    }
+                });
+
+                Object.values(dadosFreezer).forEach(registro => {
+                    if (registro.data && registro.data.slice(3) === mesAnoBR) {
+                        totalFreezer += (registro.total || 0);
+                    }
+                });
+
+                Object.values(dadosInsumos).forEach(registro => {
+                    if (registro.data && registro.data.slice(3) === mesAnoBR) {
+                        totalInsumos += (registro.total || 0);
+                    }
+                });
+                
+                Object.values(dadosCaixa).forEach(registro => {
+                    if (registro.data && registro.data.slice(3) === mesAnoBR) {
+                        totalTaxas += (registro.taxasMaquina || 0);
+                    }
+                });
+
+                const totalEntradas = totalCortes + totalFreezer;
+                const totalSaidas = totalInsumos + totalTaxas;
+                const lucroLiquido = totalEntradas - totalSaidas;
+
+                const elCortes = document.getElementById('res-cortes');
+                const elFreezer = document.getElementById('res-freezer');
+                const elEntradasTot = document.getElementById('res-entradas-total');
+                const elInsumos = document.getElementById('res-insumos');
+                const elTaxas = document.getElementById('res-taxas');
+                const elSaidasTot = document.getElementById('res-saidas-total');
+                const lucroEl = document.getElementById('res-lucro');
+
+                if(elCortes) elCortes.textContent = totalCortes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if(elFreezer) elFreezer.textContent = totalFreezer.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if(elEntradasTot) elEntradasTot.textContent = totalEntradas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                if(elInsumos) elInsumos.textContent = totalInsumos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if(elTaxas) elTaxas.textContent = totalTaxas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if(elSaidasTot) elSaidasTot.textContent = totalSaidas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                if(lucroEl) {
+                    lucroEl.textContent = lucroLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    lucroEl.style.color = lucroLiquido >= 0 ? '#15803d' : '#dc2626';
+                }
+            }
+
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay'); 
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', function () {
+                    sidebar.classList.add('open');
+                    overlay.classList.add('active');
+                });
+                function fecharMenu() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+        });
+    </script>
+</body>
+
+</html>

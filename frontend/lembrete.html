@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Barbearia</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- TAGS DO APLICATIVO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <!-- OVERLAY E BARRA LATERAL -->
+    <div id="overlay" class="overlay"></div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu</h3>
+            <button id="btn-close-sidebar" class="btn-close">✕</button>
+        </div>
+        <a href="/index.html" class="link-admin">Fichas e Faturamento</a>
+        <a href="/classificacao.html" class="link-admin">Classificação e Troco</a>
+        <a href="/freezer.html" class="link-admin">Vendas do Freezer</a>
+        <a href="/insumos.html" class="link-admin">Insumos e Contas</a>
+        <a href="/resultados.html" class="link-admin">Resultados do Mês</a>
+        <a href="/grafico.html" class="link-admin">Gráfico Comparativo</a>
+        <a href="/relatorio.html" class="link-admin">Relatórios e Ocorrências</a>
+        <a href="/lembrete.html" class="link-admin ativo">Lembretes e Prazos</a>
+        <a href="/perfis.html" class="link-admin">Gestão de Perfis 👤</a>
+    </nav>
+
+    <!-- TOPO -->
+    <header>
+        <button id="btn-toggle-sidebar" class="btn-menu">☰</button>
+        <h1>Lembretes e Prazos</h1>
+        <button id="btn-sair" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 14px; border-radius: 6px; cursor: pointer; margin-left: auto; width: auto; margin-top: 0; font-size: 0.9rem; font-weight: 500;">Sair 🚪</button>
+    </header>
+
+    <main class="container">
+        <!-- Bloco 1: Adicionar Novo Lembrete -->
+        <section class="card full-width" style="border-top: 5px solid #1e3a8a;">
+            <h2 style="color: #1e3a8a;">⏰ Agendar Novo Lembrete</h2>
+            <form id="form-lembrete">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div class="mb-3">
+                        <label for="data-lembrete">🗓️ Data Limite (Prazo):</label>
+                        <input type="date" id="data-lembrete" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="texto-lembrete">📝 O que precisa ser feito?</label>
+                        <input type="text" id="texto-lembrete" required placeholder="Ex: Pagar cadeira nova, Renovar aluguel...">
+                    </div>
+                </div>
+
+                <button type="submit" style="background-color: #1e3a8a; margin-top: 25px; padding: 15px; font-size: 1.1rem;">Salvar Lembrete ✔️</button>
+            </form>
+        </section>
+
+        <!-- Bloco 2: Lista de Lembretes -->
+        <section class="card full-width">
+            <h2>📌 Meus Lembretes</h2>
+            
+            <!-- Os lembretes aparecerão aqui dentro -->
+            <div id="lista-lembretes" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                <!-- Preenchido pelo JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Módulos do Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx9vj35UmazycfEg6eJnywpiEbPCedwAA",
+            authDomain: "barbearia-sistema-6df17.firebaseapp.com",
+            databaseURL: "https://barbearia-sistema-6df17-default-rtdb.firebaseio.com",
+            projectId: "barbearia-sistema-6df17",
+            storageBucket: "barbearia-sistema-6df17.firebasestorage.app",
+            messagingSenderId: "61872699770",
+            appId: "1:61872699770:web:ed311674ba3e6a3688bec3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const dbLembretesRef = ref(db, 'registrosLembretes');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '/login.html';
+            } else {
+                const snapshot = await get(child(ref(db), `usuarios/${user.uid}`));
+                if (snapshot.exists() && snapshot.val().perfil !== 'master') {
+                    alert("Acesso Negado! Apenas administradores podem acessar esta página.");
+                    window.location.href = '/index.html';
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnSair = document.getElementById('btn-sair');
+            if (btnSair) {
+                btnSair.addEventListener('click', () => {
+                    signOut(auth).then(() => window.location.href = '/login.html');
+                });
+            }
+
+            const sidebar = document.getElementById('sidebar');
+            const btnToggle = document.getElementById('btn-toggle-sidebar');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            const overlay = document.getElementById('overlay'); 
+
+            function fecharMenu() {
+                if (sidebar) sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+            }
+
+            if (btnToggle && sidebar && btnClose && overlay) {
+                btnToggle.addEventListener('click', function () {
+                    sidebar.classList.add('open');
+                    overlay.classList.add('active');
+                });
+                btnClose.addEventListener('click', fecharMenu);
+                overlay.addEventListener('click', fecharMenu);
+            }
+
+            const formLembrete = document.getElementById('form-lembrete');
+            const listaLembretes = document.getElementById('lista-lembretes');
+
+            if(formLembrete) {
+                formLembrete.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const dataISO = document.getElementById('data-lembrete').value;
+                    const texto = document.getElementById('texto-lembrete').value.trim();
+                    const dataBR = dataISO.split('-').reverse().join('/');
+
+                    const novoRegistro = {
+                        dataISO: dataISO,
+                        dataBR: dataBR,
+                        texto: texto
+                    };
+
+                    push(dbLembretesRef, novoRegistro);
+                    formLembrete.reset();
+                    alert("Lembrete agendado com sucesso!");
+                });
+            }
+
+            onValue(dbLembretesRef, (snapshot) => {
+                const dados = snapshot.val() || {};
+                
+                const arrayLembretes = Object.keys(dados).map(id => {
+                    return { id: id, ...dados[id] };
+                });
+
+                arrayLembretes.sort((a, b) => new Date(a.dataISO) - new Date(b.dataISO));
+
+                if(!listaLembretes) return;
+                listaLembretes.innerHTML = '';
+                
+                const hoje = new Date();
+                hoje.setHours(0, 0, 0, 0);
+
+                let qtd = 0;
+
+                arrayLembretes.forEach(reg => {
+                    qtd++;
+                    
+                    const partesData = reg.dataISO.split('-');
+                    const dataPrazo = new Date(partesData[0], partesData[1] - 1, partesData[2]);
+                    dataPrazo.setHours(0, 0, 0, 0);
+                    
+                    const diferencaTempo = dataPrazo - hoje;
+                    const diferencaDias = Math.ceil(diferencaTempo / (1000 * 60 * 60 * 24));
+
+                    let corBorda = '';
+                    let corFundo = '';
+                    let icone = '';
+                    let textoStatus = '';
+
+                    if (diferencaDias <= 7) {
+                        corBorda = '#ef4444'; 
+                        corFundo = '#fef2f2';
+                        icone = '❗';
+                        textoStatus = diferencaDias < 0 ? `Atrasado há ${Math.abs(diferencaDias)} dia(s)` : (diferencaDias === 0 ? 'Vence Hoje!' : `Vence em ${diferencaDias} dia(s)`);
+                    } else if (diferencaDias <= 30) {
+                        corBorda = '#f59e0b'; 
+                        corFundo = '#fefce8';
+                        icone = '⚠️';
+                        textoStatus = `Vence em ${diferencaDias} dias`;
+                    } else {
+                        corBorda = '#22c55e'; 
+                        corFundo = '#f0fdf4';
+                        icone = '✅';
+                        textoStatus = `Tranquilo (Vence em ${diferencaDias} dias)`;
+                    }
+
+                    const card = document.createElement('div');
+                    card.style.cssText = `background: ${corFundo}; border-left: 5px solid ${corBorda}; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0;`;
+                    
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <span style="font-size: 1.1rem; margin-right: 5px;">${icone}</span>
+                                <strong style="color: ${corBorda}; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">${textoStatus}</strong>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-reprogramar" data-id="${reg.id}" data-br="${reg.dataBR}" style="background-color: #1e3a8a; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; width: auto; margin-top: 0; box-shadow: none;" title="Escolher uma nova data">Reprogramar 📅</button>
+                                <button class="btn-excluir" data-id="${reg.id}" style="background-color: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; width: auto; margin-top: 0; box-shadow: none;" title="Concluir e Apagar Lembrete">Concluído ✔️</button>
+                            </div>
+                        </div>
+                        <h3 style="color: #0f172a; margin: 5px 0 10px 0; font-size: 1.15rem; font-weight: 700;">${reg.texto}</h3>
+                        <p style="color: #64748b; font-size: 0.9rem; margin: 0;"><strong>Data Limite:</strong> ${reg.dataBR}</p>
+                    `;
+                    listaLembretes.appendChild(card);
+                });
+
+                if (qtd === 0) {
+                    listaLembretes.innerHTML = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Você não tem nenhum lembrete agendado.</p>';
+                }
+            });
+
+            if(listaLembretes) {
+                listaLembretes.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('btn-excluir')) {
+                        const idFirebase = e.target.getAttribute('data-id');
+                        if (confirm("Marcar este lembrete como concluído e removê-lo da lista?")) {
+                            remove(ref(db, 'registrosLembretes/' + idFirebase));
+                        }
+                    }
+
+                    if (e.target.classList.contains('btn-reprogramar')) {
+                        const idFirebase = e.target.getAttribute('data-id');
+                        const dataAtualBR = e.target.getAttribute('data-br');
+                        
+                        const novaData = prompt("Digite a nova data para o lembrete (Formato: DD/MM/AAAA):", dataAtualBR);
+                        
+                        if (novaData && novaData !== dataAtualBR) {
+                            const partes = novaData.split('/');
+                            if (partes.length === 3 && partes[2].length === 4) {
+                                const dia = partes[0].padStart(2, '0');
+                                const mes = partes[1].padStart(2, '0');
+                                const ano = partes[2];
+                                
+                                const novaDataISO = `${ano}-${mes}-${dia}`;
+                                const novaDataBR_Formatada = `${dia}/${mes}/${ano}`;
+                                
+                                update(ref(db, 'registrosLembretes/' + idFirebase), {
+                                    dataISO: novaDataISO,
+                                    dataBR: novaDataBR_Formatada
+                                });
+                            } else {
+                                alert("Formato de data inválido! Por favor, use o padrão Dia/Mês/Ano (Exemplo: 25/08/2026).");
+                            }
+                        }
+                    }
+                });
+            }
+       });
+    </script>
+
+    <!-- SCRIPT DO APLICATIVO (SERVICE WORKER) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('App Registrado com sucesso!'))
+                    .catch(err => console.log('Falha ao registrar o App: ', err));
+            });
+        }
+    </script>
+</body>
+</html>
