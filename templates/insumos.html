@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block titulo %}Insumos e Contas - Barbearia{% endblock %}
+{% block cabecalho %}Insumos e Contas{% endblock %}
+
+{% block conteudo %}
+<section class="card full-width" style="border-top: 5px solid #ef4444;">
+    <h2 style="color: #dc2626;">💸 Registrar Conta ou Insumo</h2>
+    <form id="form-insumo">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+            <div class="mb-3">
+                <label for="data-gasto">🗓️ Data:</label>
+                <input type="date" id="data-gasto" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="nome-conta">📝 Conta / Produto:</label>
+                <input type="text" id="nome-conta" required placeholder="Ex: Conta de Luz, Gel, Lâminas...">
+            </div>
+
+            <div class="mb-3">
+                <label for="qtd-conta">📦 Quantidade:</label>
+                <input type="number" id="qtd-conta" min="1" value="1" required placeholder="Ex: 1">
+            </div>
+
+            <div class="mb-3">
+                <label for="valor-conta">💵 Valor Unitário / Total (R$):</label>
+                <input type="number" id="valor-conta" min="0" step="0.01" required placeholder="Ex: 150.00">
+            </div>
+        </div>
+
+        <input type="file" id="input-comprovante-insumo" accept="image/*,application/pdf" style="display: none;">
+
+        <button type="submit" style="background-color: #ef4444; margin-top: 25px; padding: 15px; font-size: 1.1rem;">Lançar Gasto 📉</button>
+    </form>
+</section>
+
+<section class="card full-width" style="border-top: 5px solid #0284c7;">
+    <h2 style="color: #0369a1;">📊 Resumo Geral de Gastos</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center;">
+            <p style="color: #64748b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Gastos no Dia</p>
+            <p id="total-qtd-gastos" style="font-size: 2.2rem; font-weight: 700; color: #0f172a;">0</p>
+        </div>
+
+        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; text-align: center;">
+            <p style="color: #991b1b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Gasto Bruto Dia</p>
+            <p id="total-gasto-dia" style="font-size: 1.8rem; font-weight: 700; color: #dc2626;">R$ 0,00</p>
+        </div>
+
+        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; text-align: center;">
+            <p style="color: #991b1b; font-size: 0.95rem; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;">Gasto Bruto Mês</p>
+            <p id="total-gasto-mes" style="font-size: 1.8rem; font-weight: 700; color: #dc2626;">R$ 0,00</p>
+        </div>
+    </div>
+</section>
+
+<section class="card full-width">
+    <h2>📋 Histórico de Lançamentos</h2>
+
+    <div class="filtros-container">
+        <div class="filtros-inputs" style="flex: 1;">
+            <input type="text" id="filtro-busca" placeholder="🔍 Buscar nome..." title="Buscar por texto" style="max-width: 180px;">
+
+            <select id="filtro-conta" title="Filtrar por Conta/Produto" style="max-width: 200px;">
+                <option value="">Todas as Contas e Produtos</option>
+            </select>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="date" id="filtro-data-inicio" title="Data Inicial">
+                <span style="font-weight: 500; color: #94a3b8;">até</span>
+                <input type="date" id="filtro-data-fim" title="Data Final">
+            </div>
+
+            <button id="btn-limpar-filtro" type="button" title="Limpar Filtros">Limpar Filtros</button>
+        </div>
+
+        <div>
+            <button id="btn-exportar" style="background-color: #1e293b; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem;" title="Baixar Planilha Excel">
+                📥 Exportar Excel
+            </button>
+        </div>
+    </div>
+
+    <div id="resumo-busca" style="display: none; background-color: #f0f9ff; color: #0369a1; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; font-weight: 500; border: 1px solid #bae6fd; align-items: center; justify-content: space-between;"></div>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Conta / Produto</th>
+                    <th>Quantidade</th>
+                    <th>Valor Unitário</th>
+                    <th>Gasto Total</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="lista-gastos"></tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/insumos.js') }}"></script>
+{% endblock %}

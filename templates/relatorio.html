@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block titulo %}Relatórios e Ocorrências - Barbearia{% endblock %}
+{% block cabecalho %}Relatórios e Ocorrências{% endblock %}
+
+{% block conteudo %}
+<!-- Bloco 1: Botão e Formulário -->
+<section class="card full-width" style="border-top: 5px solid #0284c7;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <h2 style="color: #0369a1;">📖 Diário de Ocorrências</h2>
+        <button id="btn-abrir-form" style="width: auto; margin-top: 0; background-color: #0284c7; padding: 12px 20px; border-radius: 8px;">
+            + Adicionar Relatório
+        </button>
+    </div>
+
+    <!-- Formulário Oculto inicialmente -->
+    <div id="container-formulario" style="display: none; margin-top: 20px; background-color: #f8fafc; padding: 25px; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+        <form id="form-relatorio">
+            <div class="mb-3" style="max-width: 250px;">
+                <label for="data-relatorio">🗓️ Data da Ocorrência:</label>
+                <input type="date" id="data-relatorio" required>
+            </div>
+
+            <div class="mb-3" style="margin-top: 15px;">
+                <label for="texto-relatorio">✍️ Relato / Observação:</label>
+                <textarea id="texto-relatorio" rows="5" required placeholder="Escreva aqui o que aconteceu no dia..." style="width: 100%; padding: 12px 16px; margin-top: 6px; border: 1.5px solid #e2e8f0; border-radius: 10px; background-color: #fff; font-size: 0.95rem; resize: vertical;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+                <button type="submit" style="background-color: #16a34a; flex: 1; margin-top: 0; padding: 12px;">Salvar Relatório ✔️</button>
+                <button type="button" id="btn-cancelar" style="background-color: #64748b; flex: 1; margin-top: 0; padding: 12px;">Cancelar ✕</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Bloco 2: Lista de Relatórios -->
+<section class="card full-width">
+    <h2>📋 Histórico de Relatórios</h2>
+
+    <div class="filtros-container" style="margin-top: 15px; margin-bottom: 25px;">
+        <div class="filtros-inputs" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <input type="month" id="filtro-mes-relatorio" title="Filtrar por Mês" style="padding: 10px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; background-color: #f8fafc;">
+            <button id="btn-limpar-filtro" type="button" title="Limpar Filtros" style="background-color: #64748b; margin-top: 0; width: auto; padding: 10px 18px; border-radius: 8px;">Ver Todos</button>
+        </div>
+    </div>
+
+    <div id="lista-relatorios" style="display: flex; flex-direction: column; gap: 15px;"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/relatorio.js') }}"></script>
+{% endblock %}
