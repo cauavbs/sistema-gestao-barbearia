@@ -20,7 +20,7 @@ lista de barbeiros) exigem perfil master também aqui no servidor.
 
 from datetime import datetime
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 
 from autenticacao.decoradores import login_obrigatorio, somente_master
 from servicos.firebase_service import referencia
@@ -47,6 +47,15 @@ def _e_domingo(data_iso: str) -> bool:
 def listar():
     dados = referencia("registrosBarbearia").get() or {}
     lista = [{"id": id_, **valor} for id_, valor in dados.items()]
+
+    # Um barbeiro só pode ver as próprias fichas — antes isso só era
+    # escondido no front-end (fichas.js), então qualquer usuário logado
+    # conseguia ver o faturamento e a comissão de todo mundo chamando
+    # essa rota diretamente (ex: pela aba Rede do navegador). O Master
+    # continua vendo tudo, sem filtro.
+    if session.get("perfil") != "master":
+        lista = [item for item in lista if item.get("barbeiro") == session.get("nome")]
+
     return jsonify(lista)
 
 
